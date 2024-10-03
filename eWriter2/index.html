@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+</head>
+<body>
+    <h1>WebSocket Example</h1>
+    <div id="content">Waiting for content...</div>
+
+    <script>
+        // Dynamically use the current IP from the URL for the WebSocket connection
+        const ip = window.location.hostname;
+        const wsUrl = `ws://${ip}:8585/websocket`; // Adjust the port to match your WebSocket server port
+        const socket = new WebSocket(wsUrl);
+
+        // Log connection open
+        socket.onopen = function() {
+            console.log('WebSocket connection established');
+            // Send a request for content once the connection is open
+            socket.send(JSON.stringify({ request: 'getContent' }));
+        };
+
+        // Handle incoming messages
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log('Received data from server:', data);
+
+            // Render the received content
+            document.getElementById('content').textContent = data.content;
+        };
+
+        // Handle connection errors
+        socket.onerror = function(error) {
+            console.log('WebSocket error:', error);
+        };
+
+        // Handle connection close
+        socket.onclose = function() {
+            console.log('WebSocket connection closed');
+        };
+    </script>
+</body>
+</html>
