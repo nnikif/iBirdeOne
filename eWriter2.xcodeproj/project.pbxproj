@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FF313E792CAFE3B3003E7EDE /* SwiftDiff in Frameworks */ = {isa = PBXBuildFile; productRef = FF313E782CAFE3B3003E7EDE /* SwiftDiff */; };
 		FFF4CC822CAEE9B800BBC9A1 /* NIO in Frameworks */ = {isa = PBXBuildFile; productRef = FFF4CC812CAEE9B800BBC9A1 /* NIO */; };
 		FFF4CC842CAEE9B800BBC9A1 /* NIOCore in Frameworks */ = {isa = PBXBuildFile; productRef = FFF4CC832CAEE9B800BBC9A1 /* NIOCore */; };
 		FFF4CC862CAEE9B800BBC9A1 /* NIOHTTP1 in Frameworks */ = {isa = PBXBuildFile; productRef = FFF4CC852CAEE9B800BBC9A1 /* NIOHTTP1 */; };
@@ -74,6 +75,7 @@
 			files = (
 				FFF4CC862CAEE9B800BBC9A1 /* NIOHTTP1 in Frameworks */,
 				FFF4CC882CAEE9B800BBC9A1 /* NIOWebSocket in Frameworks */,
+				FF313E792CAFE3B3003E7EDE /* SwiftDiff in Frameworks */,
 				FFF4CC842CAEE9B800BBC9A1 /* NIOCore in Frameworks */,
 				FFF4CC822CAEE9B800BBC9A1 /* NIO in Frameworks */,
 			);
@@ -140,6 +142,7 @@
 				FFF4CC832CAEE9B800BBC9A1 /* NIOCore */,
 				FFF4CC852CAEE9B800BBC9A1 /* NIOHTTP1 */,
 				FFF4CC872CAEE9B800BBC9A1 /* NIOWebSocket */,
+				FF313E782CAFE3B3003E7EDE /* SwiftDiff */,
 			);
 			productName = eWriter2;
 			productReference = FFF4CC4F2CAEE88B00BBC9A1 /* eWriter2.app */;
@@ -225,6 +228,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				FFF4CC802CAEE9B800BBC9A1 /* XCRemoteSwiftPackageReference "swift-nio" */,
+				FF313E772CAFE3B3003E7EDE /* XCRemoteSwiftPackageReference "SwiftDiff" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FFF4CC502CAEE88B00BBC9A1 /* Products */;
@@ -595,6 +599,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		FF313E772CAFE3B3003E7EDE /* XCRemoteSwiftPackageReference "SwiftDiff" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/niklhut/SwiftDiff.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
+			};
+		};
 		FFF4CC802CAEE9B800BBC9A1 /* XCRemoteSwiftPackageReference "swift-nio" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-nio.git";
@@ -606,6 +618,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FF313E782CAFE3B3003E7EDE /* SwiftDiff */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF313E772CAFE3B3003E7EDE /* XCRemoteSwiftPackageReference "SwiftDiff" */;
+			productName = SwiftDiff;
+		};
 		FFF4CC812CAEE9B800BBC9A1 /* NIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FFF4CC802CAEE9B800BBC9A1 /* XCRemoteSwiftPackageReference "swift-nio" */;

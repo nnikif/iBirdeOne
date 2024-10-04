@@ -75,7 +75,7 @@ final class HTTPHandler: ChannelInboundHandler {
 }
 
 // This function sets up the HTTP server
-func createServer(group: EventLoopGroup, htmlFilePath: String) throws {
+func startHTTPServer(group: EventLoopGroup, htmlFilePath: String) throws {
     let bootstrap = ServerBootstrap(group: group)
         .childChannelInitializer { channel in
             channel.pipeline.configureHTTPServerPipeline().flatMap {

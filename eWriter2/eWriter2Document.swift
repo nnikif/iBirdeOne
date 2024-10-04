@@ -14,26 +14,25 @@ extension UTType {
     }
 }
 
-struct eWriter2Document: FileDocument {
-    var text: String
+class eWriter2Document: ObservableObject, FileDocument {
+    static var readableContentTypes: [UTType] { [.plainText] }
 
-    init(text: String = "Hello, world!") {
-        self.text = text
-    }
+        @Published var text: String
 
-    static var readableContentTypes: [UTType] { [.exampleText] }
-
-    init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents,
-              let string = String(data: data, encoding: .utf8)
-        else {
-            throw CocoaError(.fileReadCorruptFile)
+        init(text: String = "Hello, world!") {
+            self.text = text
         }
-        text = string
-    }
-    
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let data = text.data(using: .utf8)!
-        return .init(regularFileWithContents: data)
-    }
+
+        required init(configuration: ReadConfiguration) throws {
+            guard let data = configuration.file.regularFileContents,
+                  let text = String(data: data, encoding: .utf8) else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            self.text = text
+        }
+
+        func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+            let data = text.data(using: .utf8)!
+            return FileWrapper(regularFileWithContents: data)
+        }
 }

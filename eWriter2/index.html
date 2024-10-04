@@ -4,15 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Example</title>
+    <style>
+           /* Embed your CSS here */
+           #content {
+               white-space: pre-wrap; /* Preserve newlines and spaces */
+               font-family: monospace; /* Optional: make it look like a text editor */
+           }
+    </style>
 </head>
 <body>
-    <h1>WebSocket Example</h1>
     <div id="content">Waiting for content...</div>
+    <script>
+    
+
+        // Function to apply diffs to the content using DOM Range API
+        function applyDiffsToFullText(textContent, diffs) {
+            let returnText = textContent;
+            diffs.forEach(diff => {
+                    const { position, delete: deleteCount, insert } = diff;
+
+                    // Apply deletions by slicing out the text
+                    if (deleteCount > 0) {
+                        returnText = returnText.slice(0, position) + returnText.slice(position + deleteCount);
+                    }
+
+                    // Apply insertions by slicing in the new text
+                    if (insert.length > 0) {
+                        returnText = returnText.slice(0, position) + insert + returnText.slice(position);
+                    }
+                });
+
+                return returnText; // Return the modified string
+        }
+        
+    </script>
 
     <script>
         // Dynamically use the current IP from the URL for the WebSocket connection
         const ip = window.location.hostname;
-        const wsUrl = `ws://${ip}:8585/websocket`; // Adjust the port to match your WebSocket server port
+        const wsUrl = `ws://${ip}:7789/websocket`; // Adjust the port to match your WebSocket server port
         const socket = new WebSocket(wsUrl);
 
         // Log connection open
@@ -26,9 +56,22 @@
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
             console.log('Received data from server:', data);
+            switch (data.mType) {
+                case "reload":
+                    // Render the received content
+                    document.getElementById('content').textContent = data.content;
+                    break;
+                case "diff":
+                    let contentElement = document.getElementById('content');
+                    const newText = applyDiffsToFullText(contentElement.textContent, JSON.parse(data.content));
+                    console.log('New text: ', newText);
+                
+                    contentElement.textContent = newText;
+                    break;
+                
+            }
+            
 
-            // Render the received content
-            document.getElementById('content').textContent = data.content;
         };
 
         // Handle connection errors

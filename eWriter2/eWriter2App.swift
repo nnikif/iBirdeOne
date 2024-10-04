@@ -8,42 +8,71 @@
 import SwiftUI
 import NIO
 import NIOHTTP1
+import NIO
 
 
 @main
 struct eWriter2App: App {
     private let serverGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+    @StateObject var webSocketHandlerContainer = WebSocketHandlerContainer(handler: WebSocketHandler())
     var body: some Scene {
         DocumentGroup(newDocument: eWriter2Document()) { file in
             ContentView(document: file.$document)
                 .onAppear {
-                    print("Starting server...")
-                    startServer()
+//                    print("Starting server...")
+//                    startServers(with: file.document)
+//                    webSocketHandlerContainer.handler = WebSocketHandler()
+                    startServers(with: file.document)
                 }
                 .onDisappear {
-                    stopServer()
+                    stopServers()
                 }
+                .onChange(of: file.document.text) { oldValue, newValue in
+//                                    print("Document text changed: \(newValue)")
+                                    // Explicitly notify the WebSocket handler of the change
+                    webSocketHandlerContainer.handler.updateDocument(documentText: newValue, oldText: oldValue)
+                    
+
+                                }
         }
                        
     }
     
-    func startServer() {
+    func startServers(with document: eWriter2Document) {
             let htmlFilePath = Bundle.main.path(forResource: "index", ofType: "html") ?? ""
-            
-        DispatchQueue.global().async {
-                    do {
-                        try createServer(group: self.serverGroup, htmlFilePath: htmlFilePath) // Corrected scope
-                    } catch {
-                        print("Failed to start server: \(error)")
-                    }
+
+            // Start the HTTP and WebSocket servers in parallel
+            DispatchQueue.global().async {
+                do {
+                    try startHTTPServer(group: self.serverGroup, htmlFilePath: htmlFilePath)
+                } catch {
+                    print("Failed to start HTTP server: \(error)")
                 }
+            }
+
+            DispatchQueue.global().async {
+                do {
+                    let handler = WebSocketHandler()
+                                    DispatchQueue.main.async {
+                                        self.webSocketHandlerContainer.handler = handler
+                                    }
+                                    
+                                    // Start the WebSocket server with the created handler
+                                    try startWebSocketServer(group: serverGroup, handler: handler)
+
+                } catch {
+                    print("Failed to start WebSocket server: \(error)")
+                }
+            }
         }
-    
-    func stopServer() {
+        
+        func stopServers() {
             do {
                 try serverGroup.syncShutdownGracefully()
             } catch {
-                print("Error shutting down server: \(error)")
+                print("Error shutting down servers: \(error)")
             }
         }
+    
+    
 }
