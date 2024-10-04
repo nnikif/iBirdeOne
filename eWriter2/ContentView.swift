@@ -23,10 +23,17 @@ struct ContentView: View {
                     text: $document.text,
                     cursorPosition: $cursorPosition,
                     startSelection: $startSelection,
-                    endSelection: $endSelection
+                    endSelection: $endSelection,
+                    onSelectionChange: { cursorPosition, startSelection, endSelection in
+                                        sendCursorSelectionUpdate(cursorPosition: cursorPosition, startSelection: startSelection, endSelection: endSelection)
+                                    }
+
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
+                .onChange(of: document.text) { oldValue, newValue in
+                            sendDocumentUpdate(oldText: oldValue, newText: newValue)
+                        }
                 
                 
                 Text("Cursor position: \(cursorPosition)")
@@ -41,6 +48,41 @@ struct ContentView: View {
         
         }
 }
+
+func sendCursorSelectionUpdate(cursorPosition: Int, startSelection: Int?, endSelection: Int?) {
+        let cursorData: [String: Any?] = [
+            "cursorPosition": cursorPosition,
+            "startSelection": startSelection,
+            "endSelection": endSelection
+        ]
+        let update: [String: Any] = [
+            "content": cursorData,
+            "mType": "cursorUpdate"
+        ]
+
+        if let jsonData = try? JSONSerialization.data(withJSONObject: update, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            WebSocketBroadcaster.shared.broadcast(message: jsonString)
+        }
+    }
+
+func sendDocumentUpdate(oldText: String, newText: String) {
+    WebSocketBroadcaster.shared.documentText = newText
+    // Implement your diff logic here
+    if let diffString = convertDiffToJSONString(oldText: oldText, newText: newText) {
+        let update: [String: Any] = [
+            "content": diffString,
+            "mType": "diff"
+        ]
+        
+        if let jsonData = try? JSONSerialization.data(withJSONObject: update, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            print("jsonString DIFF: '\(jsonString)")
+            WebSocketBroadcaster.shared.broadcast(message: jsonString)
+        }
+    }
+}
+
 
 #Preview {
     ContentView(document: .constant(eWriter2Document()))

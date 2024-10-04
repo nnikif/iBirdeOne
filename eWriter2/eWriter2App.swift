@@ -8,7 +8,6 @@
 import SwiftUI
 import NIO
 import NIOHTTP1
-import NIO
 
 
 @main
@@ -27,13 +26,13 @@ struct eWriter2App: App {
                 .onDisappear {
                     stopServers()
                 }
-                .onChange(of: file.document.text) { oldValue, newValue in
-//                                    print("Document text changed: \(newValue)")
-                                    // Explicitly notify the WebSocket handler of the change
-                    webSocketHandlerContainer.handler.updateDocument(documentText: newValue, oldText: oldValue)
-                    
-
-                                }
+//                .onChange(of: file.document.text) { oldValue, newValue in
+////                                    print("Document text changed: \(newValue)")
+//                                    // Explicitly notify the WebSocket handler of the change
+//                    webSocketHandlerContainer.handler.updateDocument(documentText: newValue, oldText: oldValue)
+//                    
+//
+//                                }
         }
                        
     }
@@ -50,20 +49,13 @@ struct eWriter2App: App {
                 }
             }
 
-            DispatchQueue.global().async {
-                do {
-                    let handler = WebSocketHandler()
-                                    DispatchQueue.main.async {
-                                        self.webSocketHandlerContainer.handler = handler
-                                    }
-                                    
-                                    // Start the WebSocket server with the created handler
-                                    try startWebSocketServer(group: serverGroup, handler: handler)
-
-                } catch {
-                    print("Failed to start WebSocket server: \(error)")
+        DispatchQueue.global().async {
+                    do {
+                        try startWebSocketServer(group: serverGroup)
+                    } catch {
+                        print("Failed to start WebSocket server: \(error)")
+                    }
                 }
-            }
         }
         
         func stopServers() {
