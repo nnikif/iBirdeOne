@@ -8,12 +8,21 @@
            /* Embed your CSS here */
            #content {
                white-space: pre-wrap; /* Preserve newlines and spaces */
-               font-family: monospace; /* Optional: make it look like a text editor */
+               position: relative;
            }
+            .cursor {
+                       position: absolute;
+                       width: 1px;
+                       background-color: black;
+                       pointer-events: none;
+                   }
     </style>
 </head>
 <body>
-    <div id="content">Waiting for content...</div>
+    <div id="content" style="white-space: pre-wrap;">
+        Waiting for content...
+    </div>
+    
     <script>
     
 
@@ -37,6 +46,84 @@
                 return returnText; // Return the modified string
         }
         
+        var cursor = document.createElement('div');
+            cursor.classList.add('cursor');
+            document.body.appendChild(cursor);
+        
+        function placeCursorAtPosition(container, position) {
+                // Ensure the container has at least one child node
+                if (!container.firstChild) {
+                    console.error('Container must have at least one child node.');
+                    return;
+                }
+
+                // Create a Range object
+                var range = document.createRange();
+
+                // Function to find the text node and offset
+                function getTextNodeAtPosition(node, offset) {
+                    var treeWalker = document.createTreeWalker(
+                        node,
+                        NodeFilter.SHOW_TEXT,
+                        function(node) {
+                            return NodeFilter.FILTER_ACCEPT;
+                        },
+                        false
+                    );
+
+                    var currentNode = treeWalker.nextNode();
+                    var currentOffset = 0;
+
+                    while (currentNode) {
+                        var nextOffset = currentOffset + currentNode.length;
+                        if (nextOffset >= offset) {
+                            return {
+                                node: currentNode,
+                                offset: offset - currentOffset
+                            };
+                        }
+                        currentOffset = nextOffset;
+                        currentNode = treeWalker.nextNode();
+                    }
+
+                    return null;
+                }
+
+                // Find the text node and offset at the desired position
+                var textPosition = getTextNodeAtPosition(container, position);
+                if (!textPosition) {
+                    console.error('Position is out of bounds.');
+                    return;
+                }
+
+                // Set the start and end of the range at the desired position
+                range.setStart(textPosition.node, textPosition.offset);
+                range.collapse(true);
+
+                // Get the bounding rectangle of the range
+                var rect = range.getBoundingClientRect();
+
+                // Get the container's bounding rectangle
+                var containerRect = container.getBoundingClientRect();
+
+                // Calculate the cursor's position relative to the viewport
+                var cursorX = rect.left + window.scrollX;
+                var cursorY = rect.top + window.scrollY;
+
+        
+               
+                cursor.style.left = cursorX + 'px';
+                cursor.style.top = cursorY + 'px';
+                cursor.style.height = rect.height + 'px';
+
+                // Append the cursor to the body
+                document.body.appendChild(cursor);
+
+                // Clean up
+                range.detach();
+            }
+
+        
     </script>
 
     <script>
@@ -44,6 +131,10 @@
         const ip = window.location.hostname;
         const wsUrl = `ws://${ip}:7789/websocket`; // Adjust the port to match your WebSocket server port
         const socket = new WebSocket(wsUrl);
+        let documentText = '';
+        let cursorPosition = 0;
+        let startSelection = 0;
+        let endSelection = 0;
 
         // Log connection open
         socket.onopen = function() {
@@ -56,19 +147,23 @@
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
             console.log('Received data from server:', data);
+            let contentElement;
             switch (data.mType) {
                 case "reload":
                     // Render the received content
-                    document.getElementById('content').textContent = data.content;
+                    documentText = data.content;
+                    document.getElementById('content').textContent = documentText;
                     break;
                 case "diff":
-                    let contentElement = document.getElementById('content');
-                    const newText = applyDiffsToFullText(contentElement.textContent, JSON.parse(data.content));
-                    console.log('New text: ', newText);
-                
-                    contentElement.textContent = newText;
+                    contentElement = document.getElementById('content');
+                    documentText = applyDiffsToFullText(documentText, JSON.parse(data.content));
+           //         console.log('New text: ', newText);
+                    contentElement.textContent = documentText;
                     break;
-                
+                case "cursorUpdate":
+                    contentElement = document.getElementById('content');
+                    placeCursorAtPosition(contentElement, data.content.cursorPosition || 0);
+                    break;
             }
             
 

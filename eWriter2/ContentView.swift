@@ -62,7 +62,9 @@ func sendCursorSelectionUpdate(cursorPosition: Int, startSelection: Int?, endSel
 
         if let jsonData = try? JSONSerialization.data(withJSONObject: update, options: []),
            let jsonString = String(data: jsonData, encoding: .utf8) {
-            WebSocketBroadcaster.shared.broadcast(message: jsonString)
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.025){
+                WebSocketBroadcaster.shared.broadcast(message: jsonString)
+            }
         }
     }
 
@@ -77,7 +79,7 @@ func sendDocumentUpdate(oldText: String, newText: String) {
         
         if let jsonData = try? JSONSerialization.data(withJSONObject: update, options: []),
            let jsonString = String(data: jsonData, encoding: .utf8) {
-            print("jsonString DIFF: '\(jsonString)")
+//            print("jsonString DIFF: '\(jsonString)")
             WebSocketBroadcaster.shared.broadcast(message: jsonString)
         }
     }
