@@ -21,6 +21,10 @@
                        background-color: black;
                        pointer-events: none;
                    }
+        .paragraph {
+            min-height: 24px; /* Ensure the empty div takes some space vertically */
+            white-space: pre-wrap; /* Respect whitespace, useful if the content has leading/trailing spaces */
+        }
     </style>
 </head>
 <body>
@@ -29,7 +33,6 @@
     </div>
     
     <script>
-        let higlightApplied = false;
         
 
         // Function to apply diffs to the content using DOM Range API
@@ -54,101 +57,155 @@
                 return returnText; // Return the modified string
         }
         
+        async function applyDiffsToParagraph(paragraphIndex, diff) {
+            const paragraphDiv = getNthParagraph(paragraphIndex);
+            if (paragraphDiv) {
+                paragraphDiv.textContent = applyDiffsToFullText(paragraphDiv.textContent, diff);
+            }
+        }
+        
         var cursor = document.createElement('div');
             cursor.classList.add('cursor');
             document.body.appendChild(cursor);
         
         function placeCursorAtPosition(container, position) {
-                // Ensure the container has at least one child node
-                if (!container.firstChild) {
-                    console.error('Container must have at least one child node.');
-                    return;
-                }
-
-                // Create a Range object
-                var range = document.createRange();
-
-                // Function to find the text node and offset
-                function getTextNodeAtPosition(node, offset) {
-                    var treeWalker = document.createTreeWalker(
-                        node,
-                        NodeFilter.SHOW_TEXT,
-                        function(node) {
-                            return NodeFilter.FILTER_ACCEPT;
-                        },
-                        false
-                    );
-
-                    var currentNode = treeWalker.nextNode();
-                    var currentOffset = 0;
-
-                    while (currentNode) {
-                        var nextOffset = currentOffset + currentNode.length;
-                        if (nextOffset >= offset) {
-                            return {
-                                node: currentNode,
-                                offset: offset - currentOffset
-                            };
-                        }
-                        currentOffset = nextOffset;
-                        currentNode = treeWalker.nextNode();
-                    }
-
-                    return null;
-                }
-
-                // Find the text node and offset at the desired position
-                var textPosition = getTextNodeAtPosition(container, position);
-                if (!textPosition) {
-                    console.error('Position is out of bounds.');
-                    return;
-                }
-
-                // Set the start and end of the range at the desired position
-                range.setStart(textPosition.node, textPosition.offset);
-                range.collapse(true);
-
-                // Get the bounding rectangle of the range
-                var rect = range.getBoundingClientRect();
-
-                // Get the container's bounding rectangle
+            // Ensure the container has at least one child node or is empty
+            if (!container.firstChild && container.childNodes.length === 0) {
+                // Handle empty container by setting cursor at the start of the empty container
                 var containerRect = container.getBoundingClientRect();
+                var cursorX = containerRect.left + window.scrollX;
+                var cursorY = containerRect.top + window.scrollY;
 
-                // Calculate the cursor's position relative to the viewport
-                var cursorX = rect.left + window.scrollX;
-                var cursorY = rect.top + window.scrollY;
-
-        
-               
                 cursor.style.left = cursorX + 'px';
                 cursor.style.top = cursorY + 'px';
-                cursor.style.height = rect.height + 'px';
+                cursor.style.height = '24px'; // Give cursor a default height for empty paragraphs
 
-                // Append the cursor to the body
-                document.body.appendChild(cursor);
-
-                // Clean up
-                range.detach();
+                return;
             }
 
-        function highlightText(text, start, end) {
+            // Create a Range object
+            var range = document.createRange();
+
+            // Function to find the text node and offset
+            function getTextNodeAtPosition(node, offset) {
+                var treeWalker = document.createTreeWalker(
+                    node,
+                    NodeFilter.SHOW_TEXT,
+                    function(node) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    },
+                    false
+                );
+
+                var currentNode = treeWalker.nextNode();
+                var currentOffset = 0;
+
+                while (currentNode) {
+                    var nextOffset = currentOffset + currentNode.length;
+                    if (nextOffset >= offset) {
+                        return {
+                            node: currentNode,
+                            offset: offset - currentOffset
+                        };
+                    }
+                    currentOffset = nextOffset;
+                    currentNode = treeWalker.nextNode();
+                }
+
+                return null;
+            }
+            
+            // If the container is empty but has focus, place cursor at the beginning
+                if (container.textContent === "" || position === 0) {
+                    var containerRect = container.getBoundingClientRect();
+                    var cursorX = containerRect.left + window.scrollX;
+                    var cursorY = containerRect.top + window.scrollY;
+
+                    cursor.style.left = cursorX + 'px';
+                    cursor.style.top = cursorY + 'px';
+                    cursor.style.height = '24px';
+
+                    return;
+                }
+
+            // Find the text node and offset at the desired position
+            var textPosition = getTextNodeAtPosition(container, position);
+            if (!textPosition) {
+                console.error('Position is out of bounds.');
+                return;
+            }
+
+            // Set the start and end of the range at the desired position
+            range.setStart(textPosition.node, textPosition.offset);
+            range.collapse(true);
+
+            // Get the bounding rectangle of the range
+            var rect = range.getBoundingClientRect();
+
+            // Get the container's bounding rectangle
+            var containerRect = container.getBoundingClientRect();
+
+            // Calculate the cursor's position relative to the viewport
+            var cursorX = rect.left + window.scrollX;
+            var cursorY = rect.top + window.scrollY;
+
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            cursor.style.height = rect.height + 'px';
+
+            // Append the cursor to the body
+            document.body.appendChild(cursor);
+
+            // Clean up
+            range.detach();
+        }
+
+
+        function highlightText(textContainer, start, end) {
             // Get the parts of the text
+            const text = textContainer.textContent
             const beforeHighlight = text.slice(0, start);
             const highlightedText = text.slice(start, end);
             const afterHighlight = text.slice(end);
 
             // Wrap the highlighted text in a span with a background color
             const highlightedHTML = `<span style="background-color: gray;">${highlightedText}</span>`;
-
             // Rebuild the text content with the highlighted part
             const newHTML = beforeHighlight + highlightedHTML + afterHighlight;
-
             // Set the HTML content of the container
-            const textContainer = document.getElementById('content');
             textContainer.innerHTML = newHTML;
-            higlightApplied = true;
         }
 
+        async function updateContentDiv(paragraphs) {
+            // Get the main content div by ID
+            const contentDiv = document.getElementById('content');
+            
+            // Clear existing content
+            contentDiv.innerHTML = '';
+            
+            // Iterate over the paragraphs array and add each paragraph to the content div
+            paragraphs.forEach((paragraphText) => {
+                // Create a new div element for each paragraph
+                const paragraphDiv = document.createElement('div');
+                paragraphDiv.className = 'paragraph';
+                paragraphDiv.textContent = paragraphText;
+                
+                // Append the paragraph div to the content div
+                contentDiv.appendChild(paragraphDiv);
+            });
+        }
+        
+        function getNthParagraph(n) {
+            const contentDiv = document.getElementById('content');
+            const paragraphs = contentDiv.getElementsByClassName('paragraph');
+
+            if (n >= 0 && n < paragraphs.length) {
+                return paragraphs[n];
+            } else {
+                console.error('Invalid paragraph index');
+                return null;
+            }
+        }
         
     </script>
 
@@ -161,7 +218,7 @@
         let cursorPosition = 0;
         let startSelection = 0;
         let endSelection = 0;
-        
+        let ingnoreNextCursorChange = false;
 
         // Log connection open
         socket.onopen = function() {
@@ -171,33 +228,50 @@
         };
 
         // Handle incoming messages
-        socket.onmessage = function(event) {
+        socket.onmessage = async function(event) {
             const data = JSON.parse(event.data);
-            console.log('Received data from server:', data);
+          //  console.log('Received data from server:', data);
             let contentElement;
-            switch (data.mType) {
-                case "reload":
-                    // Render the received content
-                    documentText = data.content;
-                    document.getElementById('content').textContent = documentText;
+            switch (data.messageType) {
+                case "paragraphReset":
+                    await updateContentDiv(JSON.parse(data.details));
+                    if (data.cursorPosition) {
+                        const cursorPosition = JSON.parse(data.cursorPosition);
+                        const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
+                        placeCursorAtPosition(paragraphDiv, cursorPosition.positionInParagraph);
+                    }
                     break;
-                case "diff":
-                    contentElement = document.getElementById('content');
-                    documentText = applyDiffsToFullText(documentText, JSON.parse(data.content));
-           //         console.log('New text: ', newText);
-                    contentElement.textContent = documentText;
+                case "paragraphDiff":
+                    const details = JSON.parse(data.details);
+                    const { index, diff } = details;
+                    const diffParsed = JSON.parse(diff);
+                    await applyDiffsToParagraph(index, diffParsed);
+                    if (data.cursorPosition) {
+                        const cursorPosition = JSON.parse(data.cursorPosition);
+                        const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
+                        ingnoreNextCursorChange = true;
+                        placeCursorAtPosition(paragraphDiv, cursorPosition.positionInParagraph);
+                    }
                     break;
                 case "cursorUpdate":
-                    contentElement = document.getElementById('content');
-                    const { startSelection, endSelection } = data.content;
-                    if (startSelection !== endSelection) {
-                        highlightText(documentText, startSelection, endSelection);
-                    } else if (higlightApplied) {
-                        contentElement.textContent = documentText;
-                        higlightApplied = false;
+                    if (!ingnoreNextCursorChange) {
+                        const cursorPosition = JSON.parse(data.cursorPosition);
+                        const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
+                        placeCursorAtPosition(paragraphDiv, cursorPosition.positionInParagraph);
+                        if (cursorPosition.selectionInfo) {
+                            const selectionInfos = JSON.parse(cursorPosition.selectionInfo);
+                            selectionInfos.forEach( selectionInfo => {
+                                const highlightParagraphDiv = getNthParagraph(selectionInfo.paragraphIndex);
+                                highlightText(highlightParagraphDiv, selectionInfo.start, selectionInfo.end);
+                                
+                            }
+                                                  )
+                        }
+                        break;
+                    } else {
+                        ingnoreNextCursorChange = false;
                     }
-                    placeCursorAtPosition(contentElement, data.content.cursorPosition || 0);
-                    break;
+                   
             }
             
 

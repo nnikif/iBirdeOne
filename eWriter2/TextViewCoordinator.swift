@@ -39,8 +39,6 @@ class TextViewCoordinator: NSObject, UITextViewDelegate {
                     self.parent.endSelection = endPosition
                     self.parent.onSelectionChange?(cursorPosition, startPosition, endPosition)
                 }
-
-
     }
 }
 
