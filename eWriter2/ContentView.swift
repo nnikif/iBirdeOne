@@ -14,38 +14,71 @@ struct ContentView: View {
     @State private var cursorPosition: Int = 0 // Track the cursor position
     @State private var startSelection: Int? = nil // Track start of the selection
     @State private var endSelection: Int? = nil
+    @State private var showOverlay = false
+    @State private var ipAddress: String = "Fetching IP..."
+
 //    let webSocketHandler: WebSocketHandler
         
     var body: some View {
+        ZStack {
             VStack {
-                // Use custom UITextView to track selected text and cursor
-                TextViewWithSelectionObserver(
-                    text: $document.text,
-                    cursorPosition: $cursorPosition,
-                    startSelection: $startSelection,
-                    endSelection: $endSelection,
-                    onSelectionChange: { cursorPosition, startSelection, endSelection in
-                                        sendCursorSelectionUpdate(cursorPosition: cursorPosition, startSelection: startSelection, endSelection: endSelection)
-                                    }
-
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding()
-                .onChange(of: document.text) { oldValue, newValue in
-                            sendDocumentUpdate(oldText: oldValue, newText: newValue)
-                        }
+            // Use custom UITextView to track selected text and cursor
+            TextViewWithSelectionObserver(
+                text: $document.text,
+                cursorPosition: $cursorPosition,
+                startSelection: $startSelection,
+                endSelection: $endSelection,
+                onSelectionChange: { cursorPosition, startSelection, endSelection in
+                    sendCursorSelectionUpdate(cursorPosition: cursorPosition, startSelection: startSelection, endSelection: endSelection)
+                }
                 
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+            .onChange(of: document.text) { oldValue, newValue in
+                sendDocumentUpdate(oldText: oldValue, newText: newValue)
+            }
+            .onAppear {
+                       ipAddress = getWiFiAddress() ?? "Unable to fetch IP"
+                   }
                 
-                Text("Cursor position: \(cursorPosition)")
+            Button(action: {
+                // Toggle the overlay when button is pressed
+                showOverlay.toggle()
+            }) {
+                Text("Hide Screen")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+                Text("Open this address in a web browser:")
+                                .font(.headline)
                                 .padding()
 
-                            // Optionally show selected text range (start and end character positions)
-                            if let start = startSelection, let end = endSelection {
-                                Text("Selected text: Start at \(start), End at \(end)")
-                                    .padding()
-                            }
-            }
-        
+                            Text(ipAddress+":8787")
+                                .font(.title)
+                                .padding()
+            
+//            Text("Cursor position: \(cursorPosition)")
+//                .padding()
+//            
+//            // Optionally show selected text range (start and end character positions)
+//            if let start = startSelection, let end = endSelection {
+//                Text("Selected text: Start at \(start), End at \(end)")
+//                    .padding()
+//            }
+        }
+            if showOverlay {
+                           Color.black // Fully opaque black overlay
+                               .ignoresSafeArea()   // Ensure the overlay covers the entire screen
+                               .onTapGesture {
+                                   // Restore the interface when the screen is touched
+                                   showOverlay = false
+                               }
+                       }
+            
+    }
         }
 }
 

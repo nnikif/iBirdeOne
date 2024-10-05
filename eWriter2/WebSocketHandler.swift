@@ -3,6 +3,8 @@ import NIOHTTP1
 import NIOWebSocket
 import Foundation
 import SwiftUI
+import SystemConfiguration.CaptiveNetwork
+import Network
 
 struct WebSocketResponse: Codable {
     let content: String
@@ -69,140 +71,39 @@ final class WebSocketHandler: ChannelInboundHandler {
 }
 
 
-//final class WebSocketHandler: ChannelInboundHandler {
-//    typealias InboundIn = WebSocketFrame
-//    typealias OutboundOut = WebSocketFrame
-//    private var documentText: String?
-//    private var channel: Channel?
-//    private var context: ChannelHandlerContext?
-//    
-//
-////        init(document: eWriter2Document) {
-////            self.documentText = document.text
-////        }
-//    init(){
-//        
-//    }
-//        
-//        // Manually update the document reference if needed
-//    func updateDocument(documentText: String, oldText: String) {
-//            self.documentText = documentText
-//            if let channel = channel {
-//                sendUpdatedDocumentContent(on: channel, oldText: oldText, newText: documentText)
-//                    }
-//        }
-//    
-//    func handlerAdded(context: ChannelHandlerContext) {
-//            self.channel = context.channel
-//            self.context = context
-//    
-//        }
-//    
-//    func sendCursorSelectionUpdate(cursorPosition: Int, startSelection: Int?, endSelection: Int?) {
-//        guard let context = self.context else {
-//            print("No context available for sending data.")
-//            return
-//        }
-//
-//            let cursorJson = ["cursorPosition": cursorPosition, "startSelection": startSelection, "endSelection": endSelection]
-//            let cursorUpdate = try? JSONEncoder().encode(cursorJson)
-//            let cursorString = String(data: cursorUpdate!, encoding: .utf8)
-//            let update = WebSocketResponse(
-//                content: cursorString ?? "",
-//                mType: "cursorUpdate"
-//            )
-//
-//            if let jsonData = try? JSONEncoder().encode(update) {
-//                var buffer = context.channel.allocator.buffer(capacity: jsonData.count)
-//                buffer.writeBytes(jsonData)
-//                let responseFrame = WebSocketFrame(fin: true, opcode: .text, data: buffer)
-//                context.writeAndFlush(self.wrapOutboundOut(responseFrame), promise: nil)
-//            }
-//        }
-//
-//    
-//    func sendUpdatedDocumentContent(on channel: Channel, oldText: String, newText: String) {
-////            let fileContent = self.documentText
-//            let diffJson = convertDiffToJSONString(oldText: oldText, newText: newText)
-//        
-//            guard let diffJson = diffJson else {
-//                print("Failed to generate diff JSON")
-//                // Handle the nil case, e.g., return or send an error response
-//                return
-//            }
-//            // Create a JSON response
-//            let response = WebSocketResponse(
-//                content: diffJson,
-//                mType: "diff"
-//            )
-//            
-//            // Encode the struct as JSON
-//            if let jsonData = try? JSONEncoder().encode(response) {
-//                var buffer = channel.allocator.buffer(capacity: jsonData.count)
-//                buffer.writeBytes(jsonData)
-//                let responseFrame = WebSocketFrame(fin: true, opcode: .text, data: buffer)
-//                
-//                // Send the JSON response
-//                channel.writeAndFlush(self.wrapOutboundOut(responseFrame), promise: nil)
-//            }
-//        }
-    
 
-    
-    
-//    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-//        self.context = context
-//        let frame = self.unwrapInboundIn(data)
-////        print("Frame received: \(frame)")
-//        
-//        
-//        if frame.opcode == .text {
-//            var data = frame.unmaskedData
-//            if let byteArray = data.readBytes(length: data.readableBytes) {
-//                if let message = String(bytes: byteArray, encoding: .utf8) {
-////                    print("Decoded message: \(message)")
-//                    
-//                    // Try to parse the message as JSON
-//                    if let jsonData = message.data(using: .utf8),
-//                       let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
-//                       let requestType = jsonObject["request"] as? String {
-//                        
-//                        // Only respond if the request is 'getContent'
-//                        if requestType == "getContent" {
-//                            
-//                            if let fileContent = self.documentText {
-//                                
-//                                // Create the response struct
-//                                let response = WebSocketResponse(content: fileContent, mType: "reload")
-//                                
-//                                // Encode the struct as JSON
-//                                if let jsonData = try? JSONEncoder().encode(response) {
-//                                    var buffer = context.channel.allocator.buffer(capacity: jsonData.count)
-//                                    buffer.writeBytes(jsonData)
-//                                    let responseFrame = WebSocketFrame(fin: true, opcode: .text, data: buffer)
-//                                    
-//                                    // Send the JSON response
-//                                    context.writeAndFlush(self.wrapOutboundOut(responseFrame), promise: nil)
-//                                } else {
-//                                    print("Failed to encode JSON response")
-//                                }
-//                            }
-//                        } else {
-//                            print("Unknown request type: \(requestType)")
-//                        }
-//                    } else {
-//                        print("Failed to parse JSON or invalid format")
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    func errorCaught(context: ChannelHandlerContext, error: Error) {
-//        print("WebSocket error: \(error)")
-//        context.close(promise: nil)
-//    }
-//}
+
+func getWiFiAddress() -> String? {
+    var address: String?
+    var ifaddr: UnsafeMutablePointer<ifaddrs>?
+
+    if getifaddrs(&ifaddr) == 0 {
+        var pointer = ifaddr
+        while pointer != nil {
+            let interface = pointer?.pointee
+            let addrFamily = interface?.ifa_addr.pointee.sa_family
+
+            if addrFamily == UInt8(AF_INET) {
+                if let name = interface?.ifa_name {
+                    let nameString = String(cString: name)
+                    if nameString == "en0" || nameString == "pdp_ip0" { // "en0" is the WiFi interface on iOS
+                        var addr = interface!.ifa_addr.pointee
+                        var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                        getnameinfo(&addr, socklen_t(interface!.ifa_addr.pointee.sa_len),
+                                    &hostname, socklen_t(hostname.count),
+                                    nil, socklen_t(0), NI_NUMERICHOST)
+                        address = String(cString: hostname)
+                    }
+                }
+            }
+            pointer = pointer?.pointee.ifa_next
+        }
+        freeifaddrs(ifaddr)
+    }
+
+    return address
+}
+
 
 func startWebSocketServer(group: EventLoopGroup) throws {
     let bootstrap = ServerBootstrap(group: group)

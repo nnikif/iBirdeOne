@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +12,8 @@
            #content {
                white-space: pre-wrap; /* Preserve newlines and spaces */
                position: relative;
+               font-size: 24px;
+               font-family: "IM Fell English", sans-serif;
            }
             .cursor {
                        position: absolute;
@@ -24,10 +29,12 @@
     </div>
     
     <script>
-    
+        let higlightApplied = false;
+        
 
         // Function to apply diffs to the content using DOM Range API
         function applyDiffsToFullText(textContent, diffs) {
+            
             let returnText = textContent;
             diffs.forEach(diff => {
                     const { position, delete: deleteCount, insert } = diff;
@@ -41,6 +48,7 @@
                     if (insert.length > 0) {
                         returnText = returnText.slice(0, position) + insert + returnText.slice(position);
                     }
+                
                 });
 
                 return returnText; // Return the modified string
@@ -123,6 +131,24 @@
                 range.detach();
             }
 
+        function highlightText(text, start, end) {
+            // Get the parts of the text
+            const beforeHighlight = text.slice(0, start);
+            const highlightedText = text.slice(start, end);
+            const afterHighlight = text.slice(end);
+
+            // Wrap the highlighted text in a span with a background color
+            const highlightedHTML = `<span style="background-color: gray;">${highlightedText}</span>`;
+
+            // Rebuild the text content with the highlighted part
+            const newHTML = beforeHighlight + highlightedHTML + afterHighlight;
+
+            // Set the HTML content of the container
+            const textContainer = document.getElementById('content');
+            textContainer.innerHTML = newHTML;
+            higlightApplied = true;
+        }
+
         
     </script>
 
@@ -135,6 +161,7 @@
         let cursorPosition = 0;
         let startSelection = 0;
         let endSelection = 0;
+        
 
         // Log connection open
         socket.onopen = function() {
@@ -162,6 +189,13 @@
                     break;
                 case "cursorUpdate":
                     contentElement = document.getElementById('content');
+                    const { startSelection, endSelection } = data.content;
+                    if (startSelection !== endSelection) {
+                        highlightText(documentText, startSelection, endSelection);
+                    } else if (higlightApplied) {
+                        contentElement.textContent = documentText;
+                        higlightApplied = false;
+                    }
                     placeCursorAtPosition(contentElement, data.content.cursorPosition || 0);
                     break;
             }

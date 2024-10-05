@@ -37,8 +37,6 @@ class TextViewCoordinator: NSObject, UITextViewDelegate {
                     // Update start and end character positions
                     self.parent.startSelection = startPosition
                     self.parent.endSelection = endPosition
-                    
-                    print("Selected text range: Start \(startPosition), End \(endPosition)")
                     self.parent.onSelectionChange?(cursorPosition, startPosition, endPosition)
                 }
 
