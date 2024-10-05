@@ -163,7 +163,9 @@ func calculateDiffResponse(oldText: String, newText: String, cursorPosition: Int
     let oldParagraphs = splitTextIntoParagraphs(text: oldText)
     let newParagraphs = splitTextIntoParagraphs(text: newText)
     guard let diffs = convertParagraphsToDiffs(oldParagraphs: oldParagraphs, newParagraphs: newParagraphs) else {
-        return MessageObject(messageType:"paragraphReset", details: stringifyArrayofString(arrayData: newParagraphs), cursorPositon: nil)
+        let cursorParagraphInfo = getCursorParagraphInfo(text: newText, cursorPosition: cursorPosition, selectionStart: nil, selectionEnd: nil)
+        let cursorPositionResponse: String? = cursorParagraphInfo != nil ? convertJSONToString(jsonObject: cursorParagraphInfo!.toDictionary()) : nil
+        return MessageObject(messageType:"paragraphReset", details: stringifyArrayofString(arrayData: newParagraphs), cursorPositon: cursorPositionResponse)
     }
     if diffs.count == 1 {
         let cursorParagraphInfo = getCursorParagraphInfo(text: newText, cursorPosition: cursorPosition, selectionStart: nil, selectionEnd: nil)
@@ -183,10 +185,13 @@ func getCursorParagraphInfo(text: String, cursorPosition: Int, selectionStart: I
     var positionInParagraph = 0
     var cursorParagraphInfo: CursorParagraphInfo
     var selectionInfo: [(paragraphIndex: Int, start: Int, end: Int)] = []
+    var lastParagraphLength = 0
+    var lastIndex = 0
     
     for (index, paragraph) in paragraphs.enumerated() {
         let paragraphLength = paragraph.count
-        
+        lastParagraphLength = paragraphLength
+        lastIndex = index
         // Check if the cursor is within the current paragraph
         if cursorPosition >= currentPos && cursorPosition <= currentPos + paragraphLength {
             positionInParagraph = cursorPosition - currentPos
@@ -216,7 +221,10 @@ func getCursorParagraphInfo(text: String, cursorPosition: Int, selectionStart: I
         
     }
     
-    
+    guard !(paragraphIndex == 0 && positionInParagraph == 0) else {
+        cursorParagraphInfo = CursorParagraphInfo(paragraphIndex: lastIndex, positionInParagraph: lastParagraphLength, selectionInfo: convertSelectionInfoToJSONString(selectionInfo: selectionInfo))
+        return cursorParagraphInfo
+    }
     cursorParagraphInfo = CursorParagraphInfo(paragraphIndex: paragraphIndex, positionInParagraph: positionInParagraph, selectionInfo: convertSelectionInfoToJSONString(selectionInfo: selectionInfo))
     return cursorParagraphInfo
 }

@@ -21,10 +21,17 @@
                        width: 1px;
                        background-color: black;
                        pointer-events: none;
+                      /* animation: blink 1s step-start infinite; */
                    }
         .paragraph {
             min-height: 24px; /* Ensure the empty div takes some space vertically */
             white-space: pre-wrap; /* Respect whitespace, useful if the content has leading/trailing spaces */
+            
+        }
+        @keyframes blink {
+          50% {
+            opacity: 0;             /* Make the cursor disappear at halfway point */
+          }
         }
     </style>
 </head>
@@ -66,9 +73,9 @@
         
         async function applyDiffsToParagraph(paragraphIndex, diff) {
             const paragraphDiv = getNthParagraph(paragraphIndex);
-            if (paragraphDiv && typeof localParagraps[index] === 'string' ) {
-                localParagraps[index] = applyDiffsToFullText(localParagraps[index])
-                paragraphDiv.textContent = localParagraps[index]
+            if (paragraphDiv && typeof localParagraps[paragraphIndex] === 'string' ) {
+                localParagraps[paragraphIndex] = applyDiffsToFullText(localParagraps[paragraphIndex], diff)
+                paragraphDiv.textContent = localParagraps[paragraphIndex]
                 applyFormatting(paragraphDiv)
             }
         }
@@ -323,7 +330,6 @@
                         if (cursorPosition.selectionInfo) {
                             const selectionInfosIndexes = [];
                             const selectionInfos = JSON.parse(cursorPosition.selectionInfo);
-                            console.log("selectionInfos: ", selectionInfos);
                             selectionInfos.forEach( selectionInfo => {
                                 const index = selectionInfo.paragraphIndex;
                                 selectionInfosIndexes.push(index);
@@ -340,11 +346,12 @@
                             });
                             prevSelectionInfosIndexes = [...selectionInfosIndexes];
                         } else {
-                            if (appliedHighlight) {
-                                appliedHighlight = false;
-                                socket.send(JSON.stringify({ request: 'getContent' }));
-                            }
-                            
+                            prevSelectionInfosIndexes.forEach(prevIndex => {
+                                const highlightParagraphDiv = getNthParagraph(prevIndex);
+                                highlightParagraphDiv.textContent = localParagraps[prevIndex];
+                                applyFormatting(highlightParagraphDiv);
+                            });
+                            prevSelectionInfosIndexes = [];
                         }
                         break;
                     } else {
