@@ -67,6 +67,7 @@
             const paragraphDiv = getNthParagraph(paragraphIndex);
             if (paragraphDiv) {
                 paragraphDiv.textContent = applyDiffsToFullText(paragraphDiv.textContent, diff);
+                applyFormatting(paragraphDiv)
             }
         }
         
@@ -173,18 +174,47 @@
 
 
         function highlightText(textContainer, start, end) {
-            // Get the parts of the text
-            const text = textContainer.textContent
-            const beforeHighlight = text.slice(0, start);
-            const highlightedText = text.slice(start, end);
-            const afterHighlight = text.slice(end);
+            const range = document.createRange();
+            const treeWalker = document.createTreeWalker(textContainer, NodeFilter.SHOW_TEXT, null, false);
+            let currentNode = treeWalker.nextNode();
+            let currentOffset = 0;
 
-            // Wrap the highlighted text in a span with a background color
-            const highlightedHTML = `<span style="background-color: gray;">${highlightedText}</span>`;
-            // Rebuild the text content with the highlighted part
-            const newHTML = beforeHighlight + highlightedHTML + afterHighlight;
-            // Set the HTML content of the container
-            textContainer.innerHTML = newHTML;
+            let startNode = null;
+            let endNode = null;
+            let startOffset = 0;
+            let endOffset = 0;
+
+            while (currentNode) {
+                const nextOffset = currentOffset + currentNode.length;
+                if (start >= currentOffset && start < nextOffset) {
+                    startNode = currentNode;
+                    startOffset = start - currentOffset;
+                }
+                if (end > currentOffset && end <= nextOffset) {
+                    endNode = currentNode;
+                    endOffset = end - currentOffset;
+                    break;
+                }
+                currentOffset = nextOffset;
+                currentNode = treeWalker.nextNode();
+            }
+
+            if (startNode && endNode) {
+                range.setStart(startNode, startOffset);
+                range.setEnd(endNode, endOffset);
+
+                // Extract the content of the range
+                const fragment = range.extractContents();
+                
+                // Wrap the fragment with a span, preserving nested tags
+                const highlightWrapper = document.createElement('span');
+                highlightWrapper.style.backgroundColor = 'gray';
+                highlightWrapper.appendChild(fragment);
+
+                // Insert the highlighted fragment back in the original range position
+                range.deleteContents();
+                range.insertNode(highlightWrapper);
+            }
             appliedHighlight = true;
         }
 
@@ -201,6 +231,7 @@
                 const paragraphDiv = document.createElement('div');
                 paragraphDiv.className = 'paragraph';
                 paragraphDiv.textContent = paragraphText;
+                applyFormatting(paragraphDiv)
                 
                 // Append the paragraph div to the content div
                 contentDiv.appendChild(paragraphDiv);
@@ -217,6 +248,19 @@
                 console.error('Invalid paragraph index');
                 return null;
             }
+        }
+        
+        function applyFormatting(textContainer) {
+            let html = textContainer.innerHTML;
+
+            // Replace '__' for bold (strong tags) without removing underscores
+               html = html.replace(/__(.*?)__/g, (match, p1) => `__<strong>${p1}</strong>__`);
+
+               // Replace '_' for italics (em tags) without removing underscores
+               html = html.replace(/_(.*?)_/g, (match, p1) => `_<em>${p1}</em>_`);
+
+            // Set the HTML content of the container
+            textContainer.innerHTML = html;
         }
         
     </script>
