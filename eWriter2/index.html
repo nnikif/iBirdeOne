@@ -40,7 +40,7 @@
     
     <script>
         let appliedHighlight = false;
-        
+        let localParagraps = [];
 
         // Function to apply diffs to the content using DOM Range API
         function applyDiffsToFullText(textContent, diffs) {
@@ -66,8 +66,9 @@
         
         async function applyDiffsToParagraph(paragraphIndex, diff) {
             const paragraphDiv = getNthParagraph(paragraphIndex);
-            if (paragraphDiv) {
-                paragraphDiv.textContent = applyDiffsToFullText(paragraphDiv.textContent, diff);
+            if (paragraphDiv && typeof localParagraps[index] === 'string' ) {
+                localParagraps[index] = applyDiffsToFullText(localParagraps[index])
+                paragraphDiv.textContent = localParagraps[index]
                 applyFormatting(paragraphDiv)
             }
         }
@@ -276,6 +277,9 @@
         let startSelection = 0;
         let endSelection = 0;
         let ingnoreNextCursorChange = false;
+        let minHighlighted = 0;
+        let maxHighlighted = 0;
+        let prevSelectionInfosIndexes = [];
 
         // Log connection open
         socket.onopen = function() {
@@ -291,7 +295,8 @@
             let contentElement;
             switch (data.messageType) {
                 case "paragraphReset":
-                    await updateContentDiv(JSON.parse(data.details));
+                    localParagraps = JSON.parse(data.details)
+                    await updateContentDiv(localParagraps);
                     if (data.cursorPosition) {
                         const cursorPosition = JSON.parse(data.cursorPosition);
                         const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
@@ -316,13 +321,24 @@
                         const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
                         placeCursorAtPosition(paragraphDiv, cursorPosition.positionInParagraph);
                         if (cursorPosition.selectionInfo) {
+                            const selectionInfosIndexes = [];
                             const selectionInfos = JSON.parse(cursorPosition.selectionInfo);
+                            console.log("selectionInfos: ", selectionInfos);
                             selectionInfos.forEach( selectionInfo => {
-                                const highlightParagraphDiv = getNthParagraph(selectionInfo.paragraphIndex);
+                                const index = selectionInfo.paragraphIndex;
+                                selectionInfosIndexes.push(index);
+                                prevSelectionInfosIndexes = prevSelectionInfosIndexes.filter(prevIndex => prevIndex !== index);
+                                const highlightParagraphDiv = getNthParagraph(index);
+                                highlightParagraphDiv.textContent = localParagraps[index];
+                                applyFormatting(highlightParagraphDiv);
                                 highlightText(highlightParagraphDiv, selectionInfo.start, selectionInfo.end);
-                                
-                            }
-                                                  )
+                            });
+                            prevSelectionInfosIndexes.forEach(prevIndex => {
+                                const highlightParagraphDiv = getNthParagraph(prevIndex);
+                                highlightParagraphDiv.textContent = localParagraps[prevIndex];
+                                applyFormatting(highlightParagraphDiv);
+                            });
+                            prevSelectionInfosIndexes = [...selectionInfosIndexes];
                         } else {
                             if (appliedHighlight) {
                                 appliedHighlight = false;
