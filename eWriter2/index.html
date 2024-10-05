@@ -28,11 +28,17 @@
     </style>
 </head>
 <body>
-    <div id="content" style="white-space: pre-wrap;">
-        Waiting for content...
+    <div id="outerContainer">
+        <div id="content" style="white-space: pre-wrap;">
+            Waiting for content...
+        </div>
+        <div id="extra-space" style="height: 800px;"></div>
+        
     </div>
     
+    
     <script>
+        let appliedHighlight = false;
         
 
         // Function to apply diffs to the content using DOM Range API
@@ -63,6 +69,7 @@
                 paragraphDiv.textContent = applyDiffsToFullText(paragraphDiv.textContent, diff);
             }
         }
+        
         
         var cursor = document.createElement('div');
             cursor.classList.add('cursor');
@@ -132,6 +139,10 @@
             var textPosition = getTextNodeAtPosition(container, position);
             if (!textPosition) {
                 console.error('Position is out of bounds.');
+                window.scrollTo({
+                            top: container.getBoundingClientRect().top + window.scrollY - 20,
+                            behavior: 'smooth'
+                        });
                 return;
             }
 
@@ -174,6 +185,7 @@
             const newHTML = beforeHighlight + highlightedHTML + afterHighlight;
             // Set the HTML content of the container
             textContainer.innerHTML = newHTML;
+            appliedHighlight = true;
         }
 
         async function updateContentDiv(paragraphs) {
@@ -266,6 +278,12 @@
                                 
                             }
                                                   )
+                        } else {
+                            if (appliedHighlight) {
+                                appliedHighlight = false;
+                                socket.send(JSON.stringify({ request: 'getContent' }));
+                            }
+                            
                         }
                         break;
                     } else {
