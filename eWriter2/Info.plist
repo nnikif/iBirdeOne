@@ -11,10 +11,10 @@
 			<string>Editor</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.nnikif.eWriter2.plain-text</string>
+				<string>public.plain-text</string>
 			</array>
 			<key>NSUbiquitousDocumentUserActivityType</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER).exampledocument</string>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).plainTextDocument</string>
 		</dict>
 	</array>
 	<key>UTImportedTypeDeclarations</key>
@@ -27,13 +27,13 @@
 			<key>UTTypeDescription</key>
 			<string>Example Text</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.nnikif.eWriter2.plain-text</string>
+			<string>com.nnikif.eWriter2.text</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>exampletext</string>
-				</array>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>ewriter</string>
+                </array>
 			</dict>
 		</dict>
 	</array>
