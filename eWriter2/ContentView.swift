@@ -10,12 +10,14 @@ import SwiftUI
 struct ContentView: View {
     @Binding var document: eWriter2Document
 //    let webSocketHandler: WebSocketHandler
+    @EnvironmentObject var config: AppConfiguration
     
     @State private var cursorPosition: Int = 0 // Track the cursor position
     @State private var startSelection: Int? = nil // Track start of the selection
     @State private var endSelection: Int? = nil
     @State private var showOverlay = false
     @State private var ipAddress: String = "Fetching IP..."
+    @State private var showSettings = false // State to manage the presentation of the settings sheet
 
 //    let webSocketHandler: WebSocketHandler
         
@@ -59,6 +61,21 @@ struct ContentView: View {
                             Text(ipAddress+":8787")
                                 .font(.title)
                                 .padding()
+                Button(action: {
+                                // Show the settings view as a modal
+                                showSettings = true
+                            }) {
+                                Text("Open Settings")
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .sheet(isPresented: $showSettings) {
+                                            // No need to pass config explicitly. SettingsView will inherit the environmentObject.
+                                            SettingsView()
+                                                .environmentObject(config) // Use the environment object, making sure it matches the AppConfiguration type expected
+                                        }
         }
             if showOverlay {
                            Color.black // Fully opaque black overlay
@@ -70,6 +87,7 @@ struct ContentView: View {
                        }
             
     }
+        .environmentObject(config)
         }
 }
 

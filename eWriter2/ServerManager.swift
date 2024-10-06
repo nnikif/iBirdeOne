@@ -11,10 +11,11 @@ import NIO
 class ServerManager {
     static let shared = ServerManager()
     private var serverGroup: MultiThreadedEventLoopGroup?
+    private var config: AppConfiguration?
 
     private init() {}
 
-    func startServers() {
+    func startServers(config: AppConfiguration) {
         if serverGroup == nil {
             serverGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         }
@@ -28,7 +29,7 @@ class ServerManager {
         // Start the HTTP and WebSocket servers in parallel
         DispatchQueue.global().async {
             do {
-                try startHTTPServer(group: group, htmlFilePath: htmlFilePath)
+                try startHTTPServer(group: group, htmlFilePath: htmlFilePath, config: config)
             } catch {
                 print("Failed to start HTTP server: \(error)")
             }
