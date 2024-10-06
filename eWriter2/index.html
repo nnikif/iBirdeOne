@@ -2,8 +2,8 @@
 <html lang="en">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+        ${fontType:url}
+    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +13,18 @@
            #content {
                white-space: pre-wrap; /* Preserve newlines and spaces */
                position: relative;
-               font-size: 24px;
-               font-family: "IM Fell English", sans-serif;
+               font-size: %{fontSize}px;
+               font-family: ${fontType:fontName};
            }
             .cursor {
                        position: absolute;
                        width: 1px;
                        background-color: black;
                        pointer-events: none;
-                      /* animation: blink 1s step-start infinite; */
+                      %{animateCursor}
                    }
         .paragraph {
-            min-height: 24px; /* Ensure the empty div takes some space vertically */
+            min-height: %{fontSize}px; /* Ensure the empty div takes some space vertically */
             white-space: pre-wrap; /* Respect whitespace, useful if the content has leading/trailing spaces */
             
         }
@@ -48,6 +48,7 @@
     <script>
         let appliedHighlight = false;
         let localParagraps = [];
+        let applyMarkdown = %{applyMarkdown};
 
         // Function to apply diffs to the content using DOM Range API
         function applyDiffsToFullText(textContent, diffs) {
@@ -76,7 +77,9 @@
             if (paragraphDiv && typeof localParagraps[paragraphIndex] === 'string' ) {
                 localParagraps[paragraphIndex] = applyDiffsToFullText(localParagraps[paragraphIndex], diff)
                 paragraphDiv.textContent = localParagraps[paragraphIndex]
-                applyFormatting(paragraphDiv)
+                if (applyMarkdown) {
+                    applyFormatting(paragraphDiv)
+                }
             }
         }
         
@@ -95,7 +98,7 @@
 
                 cursor.style.left = cursorX + 'px';
                 cursor.style.top = cursorY + 'px';
-                cursor.style.height = '24px'; // Give cursor a default height for empty paragraphs
+                cursor.style.height = '%{fontSize}px'; // Give cursor a default height for empty paragraphs
 
                 return;
             }
@@ -140,7 +143,7 @@
 
                     cursor.style.left = cursorX + 'px';
                     cursor.style.top = cursorY + 'px';
-                    cursor.style.height = '24px';
+                    cursor.style.height = '%{fontSize}px';
 
                     return;
                 }
@@ -240,8 +243,9 @@
                 const paragraphDiv = document.createElement('div');
                 paragraphDiv.className = 'paragraph';
                 paragraphDiv.textContent = paragraphText;
-                applyFormatting(paragraphDiv)
-                
+                if (applyMarkdown) {
+                    applyFormatting(paragraphDiv)
+                }
                 // Append the paragraph div to the content div
                 contentDiv.appendChild(paragraphDiv);
             });
@@ -336,20 +340,26 @@
                                 prevSelectionInfosIndexes = prevSelectionInfosIndexes.filter(prevIndex => prevIndex !== index);
                                 const highlightParagraphDiv = getNthParagraph(index);
                                 highlightParagraphDiv.textContent = localParagraps[index];
-                                applyFormatting(highlightParagraphDiv);
+                                if (applyMarkdown) {
+                                    applyFormatting(highlightParagraphDiv);
+                                }
                                 highlightText(highlightParagraphDiv, selectionInfo.start, selectionInfo.end);
                             });
                             prevSelectionInfosIndexes.forEach(prevIndex => {
                                 const highlightParagraphDiv = getNthParagraph(prevIndex);
                                 highlightParagraphDiv.textContent = localParagraps[prevIndex];
-                                applyFormatting(highlightParagraphDiv);
+                                if (applyMarkdown) {
+                                    applyFormatting(highlightParagraphDiv);
+                                }
                             });
                             prevSelectionInfosIndexes = [...selectionInfosIndexes];
                         } else {
                             prevSelectionInfosIndexes.forEach(prevIndex => {
                                 const highlightParagraphDiv = getNthParagraph(prevIndex);
                                 highlightParagraphDiv.textContent = localParagraps[prevIndex];
-                                applyFormatting(highlightParagraphDiv);
+                                if (applyMarkdown) {
+                                    applyFormatting(highlightParagraphDiv);
+                                }
                             });
                             prevSelectionInfosIndexes = [];
                         }

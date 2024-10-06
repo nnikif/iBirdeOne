@@ -14,11 +14,12 @@ final class HTTPHandler: ChannelInboundHandler {
     typealias OutboundOut = HTTPServerResponsePart
     
     let htmlFilePath: String
+    let config: AppConfiguration
     
-    init(htmlFilePath: String) {
-        self.htmlFilePath = htmlFilePath
+    init(htmlFilePath: String, config: AppConfiguration) {
+            self.htmlFilePath = htmlFilePath
+            self.config = config
     }
-    
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let reqPart = self.unwrapInboundIn(data)
         
@@ -41,7 +42,9 @@ final class HTTPHandler: ChannelInboundHandler {
         do {
 //            print("HELLO!")
             let htmlData = try Data(contentsOf: URL(fileURLWithPath: htmlFilePath))
-            let htmlString = String(data: htmlData, encoding: .utf8) ?? "<html><body>Error loading HTML</body></html>"
+            let htmlTemplateString = String(data: htmlData, encoding: .utf8) ?? "<html><body>Error loading HTML</body></html>"
+            let processor = TemplateProcessor(config: config)
+            let htmlString = processor.process(template: htmlTemplateString)
 //            let htmlString = "<html><body>Hello World</body></html>"
             let responseHead = HTTPResponseHead(version: .http1_1, status: .ok)
             context.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)
@@ -75,11 +78,11 @@ final class HTTPHandler: ChannelInboundHandler {
 }
 
 // This function sets up the HTTP server
-func startHTTPServer(group: EventLoopGroup, htmlFilePath: String) throws {
+func startHTTPServer(group: EventLoopGroup, htmlFilePath: String, config: AppConfiguration) throws {
     let bootstrap = ServerBootstrap(group: group)
         .childChannelInitializer { channel in
             channel.pipeline.configureHTTPServerPipeline().flatMap {
-                channel.pipeline.addHandler(HTTPHandler(htmlFilePath: htmlFilePath))
+                channel.pipeline.addHandler(HTTPHandler(htmlFilePath: htmlFilePath, config: config))
             }
         }
         .serverChannelOption(ChannelOptions.backlog, value: 256)
