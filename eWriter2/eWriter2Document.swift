@@ -10,7 +10,7 @@ import UniformTypeIdentifiers
 
 extension UTType {
     static var exampleText: UTType {
-        UTType(importedAs: "com.example.plain-text")
+        UTType(importedAs: "com.nnikif.eWriter2.plain-text")
     }
 }
 
