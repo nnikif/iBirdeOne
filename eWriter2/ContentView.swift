@@ -29,14 +29,14 @@ struct ContentView: View {
                 startSelection: $startSelection,
                 endSelection: $endSelection,
                 onSelectionChange: { cursorPosition, startSelection, endSelection in
-                    sendCursorSelectionUpdate(cursorPosition: cursorPosition, startSelection: startSelection, endSelection: endSelection)
+                    sendCursorSelectionUpdate(cursorPosition: cursorPosition, startSelection: startSelection, endSelection: endSelection, document:  document)
                 }
                 
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
             .onChange(of: document.text) { oldValue, newValue in
-                sendDocumentUpdate(oldText: oldValue, newText: newValue)
+                sendDocumentUpdate(oldText: oldValue, newText: newValue, cursorPosition: cursorPosition)
             }
             .onAppear {
                        ipAddress = getWiFiAddress() ?? "Unable to fetch IP"
@@ -59,15 +59,6 @@ struct ContentView: View {
                             Text(ipAddress+":8787")
                                 .font(.title)
                                 .padding()
-            
-//            Text("Cursor position: \(cursorPosition)")
-//                .padding()
-//            
-//            // Optionally show selected text range (start and end character positions)
-//            if let start = startSelection, let end = endSelection {
-//                Text("Selected text: Start at \(start), End at \(end)")
-//                    .padding()
-//            }
         }
             if showOverlay {
                            Color.black // Fully opaque black overlay
@@ -82,40 +73,23 @@ struct ContentView: View {
         }
 }
 
-func sendCursorSelectionUpdate(cursorPosition: Int, startSelection: Int?, endSelection: Int?) {
-        let cursorData: [String: Any?] = [
-            "cursorPosition": cursorPosition,
-            "startSelection": startSelection,
-            "endSelection": endSelection
-        ]
-        let update: [String: Any] = [
-            "content": cursorData,
-            "mType": "cursorUpdate"
-        ]
-
-        if let jsonData = try? JSONSerialization.data(withJSONObject: update, options: []),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            DispatchQueue.global().asyncAfter(deadline: .now() + 0.025){
-                WebSocketBroadcaster.shared.broadcast(message: jsonString)
+func sendCursorSelectionUpdate(cursorPosition: Int, startSelection: Int?, endSelection: Int?, document: eWriter2Document) {
+        let text = document.text
+        let cursorParagraphInfo = getCursorParagraphInfo(text: text, cursorPosition: cursorPosition, selectionStart: startSelection, selectionEnd: endSelection)
+        if let cursorParagraphInfo {
+            let cursorData = convertJSONToString(jsonObject: cursorParagraphInfo.toDictionary())
+            let messageObject = MessageObject(messageType: "cursorUpdate", details: nil, cursorPositon: cursorData)
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.025) {
+                WebSocketBroadcaster.shared.broadcast(message: convertJSONToString(jsonObject: messageObject.toDictionary()))
             }
         }
     }
 
-func sendDocumentUpdate(oldText: String, newText: String) {
+func sendDocumentUpdate(oldText: String, newText: String, cursorPosition: Int) {
     WebSocketBroadcaster.shared.documentText = newText
-    // Implement your diff logic here
-    if let diffString = convertDiffToJSONString(oldText: oldText, newText: newText) {
-        let update: [String: Any] = [
-            "content": diffString,
-            "mType": "diff"
-        ]
-        
-        if let jsonData = try? JSONSerialization.data(withJSONObject: update, options: []),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-//            print("jsonString DIFF: '\(jsonString)")
-            WebSocketBroadcaster.shared.broadcast(message: jsonString)
-        }
-    }
+    let messageObject = calculateDiffResponse(oldText: oldText, newText: newText, cursorPosition: cursorPosition)
+    let jsonString = convertJSONToString(jsonObject: messageObject.toDictionary())
+    WebSocketBroadcaster.shared.broadcast(message: jsonString)
 }
 
 

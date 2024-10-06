@@ -3,6 +3,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,24 +14,40 @@
                white-space: pre-wrap; /* Preserve newlines and spaces */
                position: relative;
                font-size: 24px;
-               font-family: "IM Fell English", sans-serif;
+               font-family: "IBM+Plex+Mono", sans-serif;
            }
             .cursor {
                        position: absolute;
                        width: 1px;
                        background-color: black;
                        pointer-events: none;
+                      /* animation: blink 1s step-start infinite; */
                    }
+        .paragraph {
+            min-height: 24px; /* Ensure the empty div takes some space vertically */
+            white-space: pre-wrap; /* Respect whitespace, useful if the content has leading/trailing spaces */
+            
+        }
+        @keyframes blink {
+          50% {
+            opacity: 0;             /* Make the cursor disappear at halfway point */
+          }
+        }
     </style>
 </head>
 <body>
-    <div id="content" style="white-space: pre-wrap;">
-        Waiting for content...
+    <div id="outerContainer">
+        <div id="content" style="white-space: pre-wrap;">
+            Waiting for content...
+        </div>
+        <div id="extra-space" style="height: 800px;"></div>
+        
     </div>
     
+    
     <script>
-        let higlightApplied = false;
-        
+        let appliedHighlight = false;
+        let localParagraps = [];
 
         // Function to apply diffs to the content using DOM Range API
         function applyDiffsToFullText(textContent, diffs) {
@@ -54,101 +71,206 @@
                 return returnText; // Return the modified string
         }
         
+        async function applyDiffsToParagraph(paragraphIndex, diff) {
+            const paragraphDiv = getNthParagraph(paragraphIndex);
+            if (paragraphDiv && typeof localParagraps[paragraphIndex] === 'string' ) {
+                localParagraps[paragraphIndex] = applyDiffsToFullText(localParagraps[paragraphIndex], diff)
+                paragraphDiv.textContent = localParagraps[paragraphIndex]
+                applyFormatting(paragraphDiv)
+            }
+        }
+        
+        
         var cursor = document.createElement('div');
             cursor.classList.add('cursor');
             document.body.appendChild(cursor);
         
         function placeCursorAtPosition(container, position) {
-                // Ensure the container has at least one child node
-                if (!container.firstChild) {
-                    console.error('Container must have at least one child node.');
-                    return;
-                }
-
-                // Create a Range object
-                var range = document.createRange();
-
-                // Function to find the text node and offset
-                function getTextNodeAtPosition(node, offset) {
-                    var treeWalker = document.createTreeWalker(
-                        node,
-                        NodeFilter.SHOW_TEXT,
-                        function(node) {
-                            return NodeFilter.FILTER_ACCEPT;
-                        },
-                        false
-                    );
-
-                    var currentNode = treeWalker.nextNode();
-                    var currentOffset = 0;
-
-                    while (currentNode) {
-                        var nextOffset = currentOffset + currentNode.length;
-                        if (nextOffset >= offset) {
-                            return {
-                                node: currentNode,
-                                offset: offset - currentOffset
-                            };
-                        }
-                        currentOffset = nextOffset;
-                        currentNode = treeWalker.nextNode();
-                    }
-
-                    return null;
-                }
-
-                // Find the text node and offset at the desired position
-                var textPosition = getTextNodeAtPosition(container, position);
-                if (!textPosition) {
-                    console.error('Position is out of bounds.');
-                    return;
-                }
-
-                // Set the start and end of the range at the desired position
-                range.setStart(textPosition.node, textPosition.offset);
-                range.collapse(true);
-
-                // Get the bounding rectangle of the range
-                var rect = range.getBoundingClientRect();
-
-                // Get the container's bounding rectangle
+            // Ensure the container has at least one child node or is empty
+            if (!container.firstChild && container.childNodes.length === 0) {
+                // Handle empty container by setting cursor at the start of the empty container
                 var containerRect = container.getBoundingClientRect();
+                var cursorX = containerRect.left + window.scrollX;
+                var cursorY = containerRect.top + window.scrollY;
 
-                // Calculate the cursor's position relative to the viewport
-                var cursorX = rect.left + window.scrollX;
-                var cursorY = rect.top + window.scrollY;
-
-        
-               
                 cursor.style.left = cursorX + 'px';
                 cursor.style.top = cursorY + 'px';
-                cursor.style.height = rect.height + 'px';
+                cursor.style.height = '24px'; // Give cursor a default height for empty paragraphs
 
-                // Append the cursor to the body
-                document.body.appendChild(cursor);
-
-                // Clean up
-                range.detach();
+                return;
             }
 
-        function highlightText(text, start, end) {
-            // Get the parts of the text
-            const beforeHighlight = text.slice(0, start);
-            const highlightedText = text.slice(start, end);
-            const afterHighlight = text.slice(end);
+            // Create a Range object
+            var range = document.createRange();
 
-            // Wrap the highlighted text in a span with a background color
-            const highlightedHTML = `<span style="background-color: gray;">${highlightedText}</span>`;
+            // Function to find the text node and offset
+            function getTextNodeAtPosition(node, offset) {
+                var treeWalker = document.createTreeWalker(
+                    node,
+                    NodeFilter.SHOW_TEXT,
+                    function(node) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    },
+                    false
+                );
 
-            // Rebuild the text content with the highlighted part
-            const newHTML = beforeHighlight + highlightedHTML + afterHighlight;
+                var currentNode = treeWalker.nextNode();
+                var currentOffset = 0;
 
-            // Set the HTML content of the container
-            const textContainer = document.getElementById('content');
-            textContainer.innerHTML = newHTML;
-            higlightApplied = true;
+                while (currentNode) {
+                    var nextOffset = currentOffset + currentNode.length;
+                    if (nextOffset >= offset) {
+                        return {
+                            node: currentNode,
+                            offset: offset - currentOffset
+                        };
+                    }
+                    currentOffset = nextOffset;
+                    currentNode = treeWalker.nextNode();
+                }
+
+                return null;
+            }
+            
+            // If the container is empty but has focus, place cursor at the beginning
+                if (container.textContent === "" || position === 0) {
+                    var containerRect = container.getBoundingClientRect();
+                    var cursorX = containerRect.left + window.scrollX;
+                    var cursorY = containerRect.top + window.scrollY;
+
+                    cursor.style.left = cursorX + 'px';
+                    cursor.style.top = cursorY + 'px';
+                    cursor.style.height = '24px';
+
+                    return;
+                }
+
+            // Find the text node and offset at the desired position
+            var textPosition = getTextNodeAtPosition(container, position);
+            if (!textPosition) {
+                console.error('Position is out of bounds.');
+                window.scrollTo({
+                            top: container.getBoundingClientRect().top + window.scrollY - 20,
+                            behavior: 'smooth'
+                        });
+                return;
+            }
+
+            // Set the start and end of the range at the desired position
+            range.setStart(textPosition.node, textPosition.offset);
+            range.collapse(true);
+
+            // Get the bounding rectangle of the range
+            var rect = range.getBoundingClientRect();
+
+            // Get the container's bounding rectangle
+            var containerRect = container.getBoundingClientRect();
+
+            // Calculate the cursor's position relative to the viewport
+            var cursorX = rect.left + window.scrollX;
+            var cursorY = rect.top + window.scrollY;
+
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            cursor.style.height = rect.height + 'px';
+
+            // Append the cursor to the body
+            document.body.appendChild(cursor);
+
+            // Clean up
+            range.detach();
         }
 
+
+        function highlightText(textContainer, start, end) {
+            const range = document.createRange();
+            const treeWalker = document.createTreeWalker(textContainer, NodeFilter.SHOW_TEXT, null, false);
+            let currentNode = treeWalker.nextNode();
+            let currentOffset = 0;
+
+            let startNode = null;
+            let endNode = null;
+            let startOffset = 0;
+            let endOffset = 0;
+
+            while (currentNode) {
+                const nextOffset = currentOffset + currentNode.length;
+                if (start >= currentOffset && start < nextOffset) {
+                    startNode = currentNode;
+                    startOffset = start - currentOffset;
+                }
+                if (end > currentOffset && end <= nextOffset) {
+                    endNode = currentNode;
+                    endOffset = end - currentOffset;
+                    break;
+                }
+                currentOffset = nextOffset;
+                currentNode = treeWalker.nextNode();
+            }
+
+            if (startNode && endNode) {
+                range.setStart(startNode, startOffset);
+                range.setEnd(endNode, endOffset);
+
+                // Extract the content of the range
+                const fragment = range.extractContents();
+                
+                // Wrap the fragment with a span, preserving nested tags
+                const highlightWrapper = document.createElement('span');
+                highlightWrapper.style.backgroundColor = 'gray';
+                highlightWrapper.appendChild(fragment);
+
+                // Insert the highlighted fragment back in the original range position
+                range.deleteContents();
+                range.insertNode(highlightWrapper);
+            }
+            appliedHighlight = true;
+        }
+
+        async function updateContentDiv(paragraphs) {
+            // Get the main content div by ID
+            const contentDiv = document.getElementById('content');
+            
+            // Clear existing content
+            contentDiv.innerHTML = '';
+            
+            // Iterate over the paragraphs array and add each paragraph to the content div
+            paragraphs.forEach((paragraphText) => {
+                // Create a new div element for each paragraph
+                const paragraphDiv = document.createElement('div');
+                paragraphDiv.className = 'paragraph';
+                paragraphDiv.textContent = paragraphText;
+                applyFormatting(paragraphDiv)
+                
+                // Append the paragraph div to the content div
+                contentDiv.appendChild(paragraphDiv);
+            });
+        }
+        
+        function getNthParagraph(n) {
+            const contentDiv = document.getElementById('content');
+            const paragraphs = contentDiv.getElementsByClassName('paragraph');
+
+            if (n >= 0 && n < paragraphs.length) {
+                return paragraphs[n];
+            } else {
+                console.error('Invalid paragraph index');
+                return null;
+            }
+        }
+        
+        function applyFormatting(textContainer) {
+            let html = textContainer.innerHTML;
+
+            // Replace '__' for bold (strong tags) without removing underscores
+               html = html.replace(/__(.*?)__/g, (match, p1) => `__<strong>${p1}</strong>__`);
+
+               // Replace '_' for italics (em tags) without removing underscores
+               html = html.replace(/_(.*?)_/g, (match, p1) => `_<em>${p1}</em>_`);
+
+            // Set the HTML content of the container
+            textContainer.innerHTML = html;
+        }
         
     </script>
 
@@ -161,7 +283,10 @@
         let cursorPosition = 0;
         let startSelection = 0;
         let endSelection = 0;
-        
+        let ingnoreNextCursorChange = false;
+        let minHighlighted = 0;
+        let maxHighlighted = 0;
+        let prevSelectionInfosIndexes = [];
 
         // Log connection open
         socket.onopen = function() {
@@ -171,33 +296,68 @@
         };
 
         // Handle incoming messages
-        socket.onmessage = function(event) {
+        socket.onmessage = async function(event) {
             const data = JSON.parse(event.data);
-            console.log('Received data from server:', data);
+          //  console.log('Received data from server:', data);
             let contentElement;
-            switch (data.mType) {
-                case "reload":
-                    // Render the received content
-                    documentText = data.content;
-                    document.getElementById('content').textContent = documentText;
+            switch (data.messageType) {
+                case "paragraphReset":
+                    localParagraps = JSON.parse(data.details)
+                    await updateContentDiv(localParagraps);
+                    if (data.cursorPosition) {
+                        const cursorPosition = JSON.parse(data.cursorPosition);
+                        const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
+                        placeCursorAtPosition(paragraphDiv, cursorPosition.positionInParagraph);
+                    }
                     break;
-                case "diff":
-                    contentElement = document.getElementById('content');
-                    documentText = applyDiffsToFullText(documentText, JSON.parse(data.content));
-           //         console.log('New text: ', newText);
-                    contentElement.textContent = documentText;
+                case "paragraphDiff":
+                    const details = JSON.parse(data.details);
+                    const { index, diff } = details;
+                    const diffParsed = JSON.parse(diff);
+                    await applyDiffsToParagraph(index, diffParsed);
+                    if (data.cursorPosition) {
+                        const cursorPosition = JSON.parse(data.cursorPosition);
+                        const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
+                        ingnoreNextCursorChange = true;
+                        placeCursorAtPosition(paragraphDiv, cursorPosition.positionInParagraph);
+                    }
                     break;
                 case "cursorUpdate":
-                    contentElement = document.getElementById('content');
-                    const { startSelection, endSelection } = data.content;
-                    if (startSelection !== endSelection) {
-                        highlightText(documentText, startSelection, endSelection);
-                    } else if (higlightApplied) {
-                        contentElement.textContent = documentText;
-                        higlightApplied = false;
+                    if (!ingnoreNextCursorChange) {
+                        const cursorPosition = JSON.parse(data.cursorPosition);
+                        const paragraphDiv = getNthParagraph(cursorPosition.paragraphIndex);
+                        placeCursorAtPosition(paragraphDiv, cursorPosition.positionInParagraph);
+                        if (cursorPosition.selectionInfo) {
+                            const selectionInfosIndexes = [];
+                            const selectionInfos = JSON.parse(cursorPosition.selectionInfo);
+                            selectionInfos.forEach( selectionInfo => {
+                                const index = selectionInfo.paragraphIndex;
+                                selectionInfosIndexes.push(index);
+                                prevSelectionInfosIndexes = prevSelectionInfosIndexes.filter(prevIndex => prevIndex !== index);
+                                const highlightParagraphDiv = getNthParagraph(index);
+                                highlightParagraphDiv.textContent = localParagraps[index];
+                                applyFormatting(highlightParagraphDiv);
+                                highlightText(highlightParagraphDiv, selectionInfo.start, selectionInfo.end);
+                            });
+                            prevSelectionInfosIndexes.forEach(prevIndex => {
+                                const highlightParagraphDiv = getNthParagraph(prevIndex);
+                                highlightParagraphDiv.textContent = localParagraps[prevIndex];
+                                applyFormatting(highlightParagraphDiv);
+                            });
+                            prevSelectionInfosIndexes = [...selectionInfosIndexes];
+                        } else {
+                            prevSelectionInfosIndexes.forEach(prevIndex => {
+                                const highlightParagraphDiv = getNthParagraph(prevIndex);
+                                highlightParagraphDiv.textContent = localParagraps[prevIndex];
+                                applyFormatting(highlightParagraphDiv);
+                            });
+                            prevSelectionInfosIndexes = [];
+                        }
+                        break;
+                    } else {
+                        ingnoreNextCursorChange = false;
                     }
-                    placeCursorAtPosition(contentElement, data.content.cursorPosition || 0);
-                    break;
+                   
             }
             
 

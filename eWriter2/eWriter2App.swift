@@ -12,59 +12,31 @@ import NIOHTTP1
 
 @main
 struct eWriter2App: App {
-    private let serverGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-    @StateObject var webSocketHandlerContainer = WebSocketHandlerContainer(handler: WebSocketHandler())
+    
+// The `@Environment` property to track app lifecycle changes
+    @Environment(\.scenePhase) private var scenePhase
+
+    
     var body: some Scene {
         DocumentGroup(newDocument: eWriter2Document()) { file in
             ContentView(document: file.$document)
-                .onAppear {
-//                    print("Starting server...")
-//                    startServers(with: file.document)
-//                    webSocketHandlerContainer.handler = WebSocketHandler()
-                    startServers(with: file.document)
-                }
-                .onDisappear {
-                    stopServers()
-                }
-//                .onChange(of: file.document.text) { oldValue, newValue in
-////                                    print("Document text changed: \(newValue)")
-//                                    // Explicitly notify the WebSocket handler of the change
-//                    webSocketHandlerContainer.handler.updateDocument(documentText: newValue, oldText: oldValue)
-//                    
-//
-//                                }
+        
         }
-                       
-    }
-    
-    func startServers(with document: eWriter2Document) {
-            let htmlFilePath = Bundle.main.path(forResource: "index", ofType: "html") ?? ""
-
-            // Start the HTTP and WebSocket servers in parallel
-            DispatchQueue.global().async {
-                do {
-                    try startHTTPServer(group: self.serverGroup, htmlFilePath: htmlFilePath)
-                } catch {
-                    print("Failed to start HTTP server: \(error)")
-                }
-            }
-
-        DispatchQueue.global().async {
-                    do {
-                        try startWebSocketServer(group: serverGroup)
-                    } catch {
-                        print("Failed to start WebSocket server: \(error)")
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+                    switch newPhase {
+                    case .active:
+                        // Resume the server when the app becomes active
+                        print("App is active. Starting server...")
+                        ServerManager.shared.startServers()
+                    case .background:
+                        // Stop the server when the app goes to the background
+                        print("App is in the background. Stopping server...")
+                        ServerManager.shared.stopServers()
+                    default:
+                        break
                     }
                 }
-        }
-        
-        func stopServers() {
-            do {
-                try serverGroup.syncShutdownGracefully()
-            } catch {
-                print("Error shutting down servers: \(error)")
-            }
-        }
-    
+                       
+    }
     
 }

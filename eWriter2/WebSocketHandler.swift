@@ -40,16 +40,24 @@ final class WebSocketHandler: ChannelInboundHandler {
                                 
                                 let fileContent = WebSocketBroadcaster.shared.documentText
                                 
-                                let update: [String: Any] = [
-                                    "content": fileContent,
-                                    "mType": "reload"
-                                ]
+                                let paragraphs = splitTextIntoParagraphs(text: fileContent)
                                 
-                                if let jsonData = try? JSONSerialization.data(withJSONObject: update),
-                                   let jsonString = String(data: jsonData, encoding: .utf8) {
-                                    print("jsonString: '\(jsonString)")
-                                    WebSocketBroadcaster.shared.broadcast(message: jsonString)
-                                }
+                                let messageObject = MessageObject(messageType:"paragraphReset", details: stringifyArrayofString(arrayData: paragraphs), cursorPositon: nil)
+                                                                  
+                                let jsonString = convertJSONToString(jsonObject: messageObject.toDictionary())
+                                                                  
+                                WebSocketBroadcaster.shared.broadcast(message: jsonString)
+                                
+//                                let update: [String: Any] = [
+//                                    "content": fileContent,
+//                                    "mType": "reload"
+//                                ]
+//                                
+//                                if let jsonData = try? JSONSerialization.data(withJSONObject: update),
+//                                   let jsonString = String(data: jsonData, encoding: .utf8) {
+//                                    print("jsonString: '\(jsonString)")
+//                                    WebSocketBroadcaster.shared.broadcast(message: jsonString)
+//                                }
                                 
                                 
                             } else {
