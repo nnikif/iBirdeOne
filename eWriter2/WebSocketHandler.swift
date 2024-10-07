@@ -28,7 +28,7 @@ final class WebSocketHandler: ChannelInboundHandler {
                 var data = frame.unmaskedData
                 if let byteArray = data.readBytes(length: data.readableBytes) {
                     if let message = String(bytes: byteArray, encoding: .utf8) {
-                        //                    print("Decoded message: \(message)")
+//                                            print("Decoded message: \(message)")
                         
                         // Try to parse the message as JSON
                         if let jsonData = message.data(using: .utf8),
@@ -48,19 +48,19 @@ final class WebSocketHandler: ChannelInboundHandler {
                                                                   
                                 WebSocketBroadcaster.shared.broadcast(message: jsonString)
                                 
-//                                let update: [String: Any] = [
-//                                    "content": fileContent,
-//                                    "mType": "reload"
-//                                ]
-//                                
-//                                if let jsonData = try? JSONSerialization.data(withJSONObject: update),
-//                                   let jsonString = String(data: jsonData, encoding: .utf8) {
-//                                    print("jsonString: '\(jsonString)")
-//                                    WebSocketBroadcaster.shared.broadcast(message: jsonString)
-//                                }
                                 
                                 
-                            } else {
+                            } else if requestType == "moveCursor" {
+                                if let newCursorPosition = jsonObject["cursorPosition"] as? Int {
+                                    DispatchQueue.main.async {
+                                        SharedTextState.shared.cursorMoved = true
+                                        SharedTextState.shared.cursorPosition = recalculateCursorPosition(text: WebSocketBroadcaster.shared.documentText, position: newCursorPosition)
+                                        
+                                    }
+                                }
+                                                                
+                            }
+                                else {
                                 print("Unknown request type: \(requestType)")
                             }
                         } else {
@@ -147,3 +147,4 @@ class WebSocketHandlerContainer: ObservableObject {
     }
 
 }
+

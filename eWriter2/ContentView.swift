@@ -37,6 +37,10 @@ struct ContentView: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
+            .onAppear {
+                // Send document update when the document is initially loaded
+                sendDocumentUpdate(oldText: "", newText: document.text, cursorPosition: cursorPosition)
+            }
             .onChange(of: document.text) { oldValue, newValue in
                 sendDocumentUpdate(oldText: oldValue, newText: newValue, cursorPosition: cursorPosition)
             }
