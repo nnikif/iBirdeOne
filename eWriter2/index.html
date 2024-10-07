@@ -297,6 +297,7 @@
         let maxHighlighted = 0;
         let prevSelectionInfosIndexes = [];
         let touchStartEvent;
+        let clickTimeout;
         
         function calculateCursorPosition(event) {
             const clickX = event.clientX;
@@ -373,11 +374,22 @@
         };
         
         document.addEventListener('click', function(event) {
-            socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
+            clickTimeout = setTimeout(() => {
+                    socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
+                    // Perform single-click action here
+                }, 100);
+            
         });
         
         document.addEventListener('touchstart', function(event) {
             touchStartEvent = event.changedTouches[0];
+        });
+        
+        document.addEventListener('dblclick', function(event) {
+            clearTimeout(clickTimeout);
+            const cursorPosition = calculateCursorPosition(event);
+            socket.send(JSON.stringify({request:"selectionChange", selectionStart: calculateCursorPosition(event), selectionEnd: cursorPosition + 1}));
+            
         });
 
         
