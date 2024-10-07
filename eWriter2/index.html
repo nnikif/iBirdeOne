@@ -278,6 +278,8 @@
             textContainer.innerHTML = html;
         }
         
+        
+        
     </script>
 
     <script>
@@ -293,6 +295,56 @@
         let minHighlighted = 0;
         let maxHighlighted = 0;
         let prevSelectionInfosIndexes = [];
+        
+        function calculateCursorPosition(event) {
+            const clickX = event.clientX;
+            const clickY = event.clientY;
+            const textContainer = document.getElementById('content');
+            if (textContainer.contains(event.target)) {
+                    const range = document.caretRangeFromPoint(clickX, clickY); // Get range from click coordinates
+
+                    if (range) {
+                        // Get the character position relative to the container
+                        return caretPosition = calculateCaretPosition(range, textContainer);
+                
+                }
+
+            
+        }
+            }
+            
+            function calculateCaretPosition(range, container) {
+                let charIndex = 0;
+                const walker = document.createTreeWalker(
+                    container,
+                    NodeFilter.SHOW_TEXT, // Only consider text nodes
+                    null,
+                    false
+                );
+
+                // Walk through the text nodes and accumulate the character position
+                while (walker.nextNode()) {
+                    const node = walker.currentNode;
+
+                    // If this is the node where the range starts, add the offset and stop
+                    if (node === range.startContainer) {
+                        charIndex += range.startOffset;
+                        break;
+                    } else {
+                        // Otherwise, add the length of this node's text content
+                        charIndex += node.textContent.length;
+                    }
+                }
+
+                return charIndex;
+            }
+        
+        document.addEventListener('click', function(event) {
+            console.log(`Click at: (${event.clientX}, ${event.clientY})`);
+            console.log(`Click target:`, event.target);
+            
+            socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
+        });
 
         // Log connection open
         socket.onopen = function() {

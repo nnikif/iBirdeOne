@@ -255,3 +255,20 @@ func convertSelectionInfoToJSONString(selectionInfo: [(paragraphIndex: Int, star
         return nil
     }
 }
+
+func recalculateCursorPosition(text: String, position: Int) -> Int {
+    guard position >= 0 && position <= text.count else {
+            print("Position out of bounds.")
+            return position
+        }
+        
+        // Get the substring up to the given position
+        let index = text.index(text.startIndex, offsetBy: position)
+        let substring = text[text.startIndex..<index]
+        
+        // Count the occurrences of '\n' in the substring
+        let numberOfLineBreaks = substring.filter { $0 == "\n" }.count
+        
+        return position + numberOfLineBreaks
+    
+}
