@@ -9,7 +9,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Example</title>
     <style>
-           /* Embed your CSS here */
+           * {
+               box-sizing: border-box; /* Ensures padding and border are included in width calculation */
+           }
+
+           body, html {
+               margin: 0;
+               padding: 0;
+               max-width: 100%;
+               overflow-x: hidden; /* Hide horizontal overflow */
+           }
            #content {
                white-space: pre-wrap; /* Preserve newlines and spaces */
                position: relative;

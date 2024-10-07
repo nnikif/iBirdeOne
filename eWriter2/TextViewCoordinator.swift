@@ -95,10 +95,20 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
             sharedState.cursorMoved = false
         }
         
-        if sharedState.selectionMoved, let startSelection = Optional(sharedState.startSelection), let endSelection = Optional(sharedState.endSelection) {
-            let selectionRange = NSRange(location: startSelection, length: endSelection - startSelection)
-            uiView.selectedRange = selectionRange // Update the selection range
-            sharedState.selectionMoved = false
+        if sharedState.selectionMoved {
+            let startSelection = Optional(sharedState.startSelection), endSelection = Optional(sharedState.endSelection)
+            guard let startSelection = startSelection, let endSelection = endSelection else {
+                    return
+                }
+            let selectionRangeNumbers =  [startSelection, endSelection]
+            if let minValue = selectionRangeNumbers.min(), let maxValue = selectionRangeNumbers.max(){
+//                print("minValue: \(minValue), maxValue: \(maxValue)")
+                let selectionRange = NSRange(location: minValue, length: (maxValue - minValue))
+                uiView.selectedRange = selectionRange // Update the selection range
+                sharedState.selectionMoved = false
+            
+            }
+                
         }
     }
     
