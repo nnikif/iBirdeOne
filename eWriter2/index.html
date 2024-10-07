@@ -17,6 +17,7 @@
                font-family: ${fontType:fontName};
                width: 98vw;
                word-break: break-word;
+               overflow-x: hidden;
            }
             .cursor {
                        position: absolute;
@@ -365,6 +366,11 @@
 
             return charIndex;
         }
+        socket.onopen = function() {
+            console.log('WebSocket connection established');
+            // Send a request for content once the connection is open
+            socket.send(JSON.stringify({ request: 'getContent' }));
+        };
         
         document.addEventListener('click', function(event) {
             socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
@@ -380,17 +386,16 @@
                     if (touchStartEvent) {
                         const touchStartPosition = calculateCursorPosition(touchStartEvent);
                         const touchEndPosition = calculateCursorPosition(event.changedTouches[0]);
-                        socket.send(JSON.stringify({request:"selectionChange", selectionStart: Math.min(touchStartPosition, touchEndPosition), selectionEnd: Math.max(touchStartPosition, touchEndPosition)}));
+                        if (Math.abs(touchStartPosition - touchEndPosition) > 0) {
+                            socket.send(JSON.stringify({request:"selectionChange", selectionStart: Math.min(touchStartPosition, touchEndPosition), selectionEnd: Math.max(touchStartPosition, touchEndPosition)}));
+                            
+                        }
                         touchStartEvent = null;
                     }
             });
 
         // Log connection open
-        socket.onopen = function() {
-            console.log('WebSocket connection established');
-            // Send a request for content once the connection is open
-            socket.send(JSON.stringify({ request: 'getContent' }));
-        };
+        
 
         // Handle incoming messages
         socket.onmessage = async function(event) {

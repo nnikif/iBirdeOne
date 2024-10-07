@@ -63,12 +63,12 @@ final class WebSocketHandler: ChannelInboundHandler {
                                 if let selectionStart = jsonObject["selectionStart"] as? Int {
                                    if let selectionEnd = jsonObject["selectionEnd"] as? Int {
                                        DispatchQueue.main.async {
-                                           SharedTextState.shared.startSelection = recalculateCursorPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionStart)
+                                           SharedTextState.shared.startSelection = recalculateSelectionPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionStart, start: true)
                                            
                                        }
                                        DispatchQueue.main.async {
                                            SharedTextState.shared.selectionMoved = true
-                                           SharedTextState.shared.endSelection = recalculateCursorPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionEnd)
+                                           SharedTextState.shared.endSelection = recalculateSelectionPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionEnd, start: false)
                                            
                                        }
                                     }
