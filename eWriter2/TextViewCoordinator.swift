@@ -25,7 +25,7 @@ class TextViewCoordinator: NSObject, UITextViewDelegate {
         }
     }
     
-    // Track cursor position changes and update state
+    // Track cursor position and selection range changes and update state
     func textViewDidChangeSelection(_ textView: UITextView) {
         let cursorPosition = textView.selectedRange.location
         DispatchQueue.main.async {
@@ -41,21 +41,25 @@ class TextViewCoordinator: NSObject, UITextViewDelegate {
             self.parent.onSelectionChange?(cursorPosition, startPosition, endPosition)
         }
     }
-    // Move the cursor programmatically
-    func moveCursor(to position: Int) {
-            DispatchQueue.main.async {
-                if let textView = self.textView { // Now the textView reference is stored in the coordinator
-                    let positionRange = NSRange(location: position, length: 0)
-                    textView.selectedRange = positionRange
-                    // Update cursor position in parent state
-                    self.parent.cursorPosition = position
-                }
+    
+    // Move the cursor or update the selection programmatically
+    func updateSelection(start: Int, end: Int) {
+        DispatchQueue.main.async {
+            if let textView = self.textView {
+                let length = max(0, end - start)
+                let selectionRange = NSRange(location: start, length: length)
+                textView.selectedRange = selectionRange
+                
+                // Update cursor and selection positions in parent state
+                self.parent.cursorPosition = start
+                self.parent.startSelection = start
+                self.parent.endSelection = end
             }
         }
+    }
 }
 
-
-// UITextView wrapper with cursor tracking
+// UITextView wrapper with cursor and selection tracking
 struct TextViewWithSelectionObserver: UIViewRepresentable {
     @Binding var text: String
     @Binding var cursorPosition: Int
@@ -66,7 +70,6 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
     var onSelectionChange: ((Int, Int?, Int?) -> Void)?
     
     @ObservedObject var sharedState = SharedTextState.shared
-
 
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
@@ -84,30 +87,40 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
         if uiView.text != text {
             uiView.text = text // Update UITextView if text changes
         }
+        
         let currentCursor = uiView.selectedRange.location
         if sharedState.cursorMoved && currentCursor != sharedState.cursorPosition {
             let positionRange = NSRange(location: sharedState.cursorPosition, length: 0)
             uiView.selectedRange = positionRange // Move the cursor to the shared state cursor position
-            sharedState.cursorMoved = false;
+            sharedState.cursorMoved = false
         }
-
+        
+        if sharedState.selectionMoved, let startSelection = Optional(sharedState.startSelection), let endSelection = Optional(sharedState.endSelection) {
+            let selectionRange = NSRange(location: startSelection, length: endSelection - startSelection)
+            uiView.selectedRange = selectionRange // Update the selection range
+            sharedState.selectionMoved = false
+        }
     }
     
     func makeCoordinator() -> TextViewCoordinator {
         return TextViewCoordinator(self)
     }
     
-    func moveCursor(to position: Int) {
-            SharedTextState.shared.cursorPosition = position // Update shared state
-        }
+    func updateSelection(start: Int, end: Int) {
+        SharedTextState.shared.startSelection = start
+        SharedTextState.shared.endSelection = end
+        SharedTextState.shared.selectionMoved = true
+    }
 }
 
 class SharedTextState: ObservableObject {
     static let shared = SharedTextState()
     
     @Published var cursorPosition: Int = 0 // The shared cursor position
+    @Published var startSelection: Int = 0
+    @Published var endSelection: Int = 0
     @Published var cursorMoved: Bool = false
-//    @Published var documentText: String = "" // Shared text document
-
+    @Published var selectionMoved: Bool = false
+    
     private init() {} // Singleton pattern
 }

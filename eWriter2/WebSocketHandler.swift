@@ -59,6 +59,20 @@ final class WebSocketHandler: ChannelInboundHandler {
                                     }
                                 }
                                                                 
+                            } else if requestType == "selectionChange" {
+                                if let selectionStart = jsonObject["selectionStart"] as? Int {
+                                   if let selectionEnd = jsonObject["selectionEnd"] as? Int {
+                                       DispatchQueue.main.async {
+                                           SharedTextState.shared.startSelection = recalculateSelectionPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionStart, start: true)
+                                           
+                                       }
+                                       DispatchQueue.main.async {
+                                           SharedTextState.shared.selectionMoved = true
+                                           SharedTextState.shared.endSelection = recalculateSelectionPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionEnd, start: false)
+                                           
+                                       }
+                                    }
+                                }
                             }
                                 else {
                                 print("Unknown request type: \(requestType)")

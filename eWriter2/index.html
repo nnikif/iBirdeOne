@@ -17,6 +17,7 @@
                font-family: ${fontType:fontName};
                width: 98vw;
                word-break: break-word;
+               overflow-x: hidden;
            }
             .cursor {
                        position: absolute;
@@ -295,6 +296,7 @@
         let minHighlighted = 0;
         let maxHighlighted = 0;
         let prevSelectionInfosIndexes = [];
+        let touchStartEvent;
         
         function calculateCursorPosition(event) {
             const clickX = event.clientX;
@@ -339,19 +341,61 @@
                 return charIndex;
             }
         
-        document.addEventListener('click', function(event) {
-            console.log(`Click at: (${event.clientX}, ${event.clientY})`);
-            console.log(`Click target:`, event.target);
-            
-            socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
-        });
+        function calculateSelectionPosition(node, offset, container) {
+            let charIndex = 0;
+            const walker = document.createTreeWalker(
+                container,
+                NodeFilter.SHOW_TEXT, // Only consider text nodes
+                null,
+                false
+            );
 
-        // Log connection open
+            // Walk through the text nodes and accumulate the character position
+            while (walker.nextNode()) {
+                const currentNode = walker.currentNode;
+
+                // If this is the node where the range starts or ends, add the offset and stop
+                if (currentNode === node) {
+                    charIndex += offset;
+                    break;
+                } else {
+                    // Otherwise, add the length of this node's text content
+                    charIndex += currentNode.textContent.length;
+                }
+            }
+
+            return charIndex;
+        }
         socket.onopen = function() {
             console.log('WebSocket connection established');
             // Send a request for content once the connection is open
             socket.send(JSON.stringify({ request: 'getContent' }));
         };
+        
+        document.addEventListener('click', function(event) {
+            socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
+        });
+        
+        document.addEventListener('touchstart', function(event) {
+            touchStartEvent = event.changedTouches[0];
+        });
+
+        
+        document.addEventListener('touchend', function(event) {
+                    // Check if there is a selection
+                    if (touchStartEvent) {
+                        const touchStartPosition = calculateCursorPosition(touchStartEvent);
+                        const touchEndPosition = calculateCursorPosition(event.changedTouches[0]);
+                        if (Math.abs(touchStartPosition - touchEndPosition) > 0) {
+                            socket.send(JSON.stringify({request:"selectionChange", selectionStart: Math.min(touchStartPosition, touchEndPosition), selectionEnd: Math.max(touchStartPosition, touchEndPosition)}));
+                            
+                        }
+                        touchStartEvent = null;
+                    }
+            });
+
+        // Log connection open
+        
 
         // Handle incoming messages
         socket.onmessage = async function(event) {

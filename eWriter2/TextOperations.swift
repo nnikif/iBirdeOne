@@ -272,3 +272,28 @@ func recalculateCursorPosition(text: String, position: Int) -> Int {
         return position + numberOfLineBreaks
     
 }
+
+func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> Int {
+    let basePosition = recalculateCursorPosition(text: text, position: position)
+    guard basePosition >= 0 && basePosition < text.count else { return 0 }
+    
+    let characters = Array(text)
+    var newPosition = basePosition
+    
+    if start {
+        // Move to the start of the word
+        while newPosition > 0 && characters[newPosition].isLetter {
+            newPosition -= 1
+        }
+        if !characters[newPosition].isLetter {
+            newPosition += 1
+        }
+    } else {
+        // Move to the end of the word
+        while newPosition < characters.count && (characters[newPosition].isLetter || characters[newPosition].isPunctuation) {
+                   newPosition += 1
+               }
+    }
+    
+    return newPosition
+}
