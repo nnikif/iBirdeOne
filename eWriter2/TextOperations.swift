@@ -279,20 +279,30 @@ func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> I
     
     let characters = Array(text)
     var newPosition = basePosition
+    var currentChar: Character
     
     if start {
         // Move to the start of the word
-        while newPosition > 0 && characters[newPosition].isLetter {
-            newPosition -= 1
-        }
-        if !characters[newPosition].isLetter {
-            newPosition += 1
-        }
+        while newPosition > 0 {
+                    currentChar = characters[newPosition]
+                    if !(currentChar.isLetter || currentChar.isPunctuation || currentChar.isNumber) {
+                        break
+                    }
+                    newPosition -= 1
+                }
+                currentChar = characters[newPosition]
+                if !(currentChar.isLetter || currentChar.isPunctuation || currentChar.isNumber) {
+                    newPosition += 1
+                }
     } else {
-        // Move to the end of the word
-        while newPosition < characters.count && (characters[newPosition].isLetter || characters[newPosition].isPunctuation) {
-                   newPosition += 1
-               }
+        while newPosition < characters.count {
+            currentChar = characters[newPosition]
+                        if currentChar.isLetter || currentChar.isPunctuation || currentChar.isNumber {
+                            newPosition += 1
+                        } else {
+                            break
+                        }
+        }
     }
     
     return newPosition
