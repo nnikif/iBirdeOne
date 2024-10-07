@@ -54,29 +54,15 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-                Text("Open this address in a web browser:")
-                                .font(.headline)
-                                .padding()
-
-                            Text(ipAddress+":8787")
-                                .font(.title)
-                                .padding()
-                Button(action: {
-                                // Show the settings view as a modal
-                                showSettings = true
-                            }) {
-                                Text("Open Settings")
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                            .sheet(isPresented: $showSettings) {
-                                            // No need to pass config explicitly. SettingsView will inherit the environmentObject.
-                                            SettingsView()
-                                                .environmentObject(config) // Use the environment object, making sure it matches the AppConfiguration type expected
-                                        }
-        }
+                HStack {
+                    Text("Open this address in a web browser: ")
+                        .font(.headline)
+                    
+                    Text("http://\(ipAddress):8787")
+                        .font(.headline) // Adjust font size to match the headline
+                }
+                .padding(.horizontal)
+                        }
             if showOverlay {
                            Color.black // Fully opaque black overlay
                                .ignoresSafeArea()   // Ensure the overlay covers the entire screen
