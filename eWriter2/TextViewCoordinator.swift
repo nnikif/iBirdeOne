@@ -70,6 +70,7 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
     var onSelectionChange: ((Int, Int?, Int?) -> Void)?
     
     @ObservedObject var sharedState = SharedTextState.shared
+    let concurrentQueue = DispatchQueue(label: "com.example.concurrentQueue", attributes: .concurrent)
 
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
@@ -87,30 +88,68 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
         if uiView.text != text {
             uiView.text = text // Update UITextView if text changes
         }
-        
-        let currentCursor = uiView.selectedRange.location
-        if sharedState.cursorMoved && currentCursor != sharedState.cursorPosition {
-            let positionRange = NSRange(location: sharedState.cursorPosition, length: 0)
-            uiView.selectedRange = positionRange // Move the cursor to the shared state cursor position
-            sharedState.cursorMoved = false
-        }
-        
-        if sharedState.selectionMoved {
-            let startSelection = Optional(sharedState.startSelection), endSelection = Optional(sharedState.endSelection)
-            guard let startSelection = startSelection, let endSelection = endSelection else {
-                    return
+            if sharedState.cutCommandIssued {
+                uiView.cut(nil)
+                DispatchQueue.main.async {
+                    sharedState.cutCommandIssued = false
                 }
-            let selectionRangeNumbers =  [startSelection, endSelection]
-            if let minValue = selectionRangeNumbers.min(), let maxValue = selectionRangeNumbers.max(){
-//                print("minValue: \(minValue), maxValue: \(maxValue)")
-                let selectionRange = NSRange(location: minValue, length: (maxValue - minValue))
-                uiView.selectedRange = selectionRange // Update the selection range
-                sharedState.selectionMoved = false
+           }
             
+            let currentCursor = uiView.selectedRange.location
+            if sharedState.cursorMoved && currentCursor != sharedState.cursorPosition {
+                let positionRange = NSRange(location: sharedState.cursorPosition, length: 0)
+                uiView.selectedRange = positionRange // Move the cursor to the shared state cursor position
+                DispatchQueue.main.async {
+                    sharedState.cursorMoved = false
+                }
             }
-                
+            
+            if sharedState.selectionMoved {
+                let startSelection = Optional(sharedState.startSelection), endSelection = Optional(sharedState.endSelection)
+                guard let startSelection = startSelection, let endSelection = endSelection else {
+                    DispatchQueue.main.async {
+                        sharedState.selectionMoved = false
+                    }
+                        return
+                    }
+                let selectionRangeNumbers =  [startSelection, endSelection]
+                if let minValue = selectionRangeNumbers.min(), let maxValue = selectionRangeNumbers.max(){
+                    let selectionRange = NSRange(location: minValue, length: (maxValue - minValue))
+                    uiView.selectedRange = selectionRange // Update the selection range
+                    DispatchQueue.main.async {
+                        sharedState.selectionMoved = false
+                    }
+                }
+            }
+            if sharedState.copyComandIssued {
+                uiView.copy(nil)
+                let newCursorPosition = uiView.selectedRange.location + uiView.selectedRange.length
+                        uiView.selectedRange = NSRange(location: newCursorPosition, length: 0)
+                        
+                        // Update shared state
+                        DispatchQueue.main.async {
+                            self.sharedState.copyComandIssued = false
+                            self.sharedState.cursorPosition = newCursorPosition
+                            self.sharedState.startSelection = newCursorPosition
+                            self.sharedState.endSelection = newCursorPosition
+                            self.sharedState.cursorMoved = true
+                        }
+            }
+            if sharedState.pasteCommandIssued {
+                uiView.paste(nil)
+
+//                pasteTextFromAppClipboard(into: uiView)
+                DispatchQueue.main.async {
+                    sharedState.pasteCommandIssued = false
+                }
+            }
+            
+            
+            
         }
-    }
+        
+        
+    
     
     func makeCoordinator() -> TextViewCoordinator {
         return TextViewCoordinator(self)
@@ -131,6 +170,24 @@ class SharedTextState: ObservableObject {
     @Published var endSelection: Int = 0
     @Published var cursorMoved: Bool = false
     @Published var selectionMoved: Bool = false
+    @Published var copyComandIssued: Bool = false
+    @Published var pasteCommandIssued: Bool = false
+    @Published var cutCommandIssued: Bool = false
     
     private init() {} // Singleton pattern
+}
+
+private var appClipboard: String? = nil
+
+func copyTextToAppClipboard(text: String) {
+    appClipboard = text
+}
+
+
+func pasteTextFromAppClipboard(into uiView: UITextView) {
+    // Get the text from the clipboard
+    guard let clipboardText = UIPasteboard.general.string else { return }
+    DispatchQueue.main.async {
+        uiView.insertText(" "+clipboardText)
+    }
 }
