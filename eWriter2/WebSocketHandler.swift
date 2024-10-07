@@ -88,6 +88,15 @@ final class WebSocketHandler: ChannelInboundHandler {
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.pasteCommandIssued = true
                                 }
+                            } else if requestType == "undoCommand" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.undoCommandIssued = true
+                                }
+                                
+                            } else if requestType == "redoCommand" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.redoCommandIssued = true
+                                }
                             }
                             
                                 else {

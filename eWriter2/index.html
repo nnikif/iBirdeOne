@@ -91,6 +91,8 @@
             </div>
             <div id="extra-space" style="height: 800px;"></div>
             <footer class="footer">
+                        <div><button onclick="event.stopPropagation(); undoCommand()">Undo</button></div>
+                        <div><button onclick="event.stopPropagation(); redoCommand()">Redo</button></div>
                         <div><button onclick="event.stopPropagation(); copyToClipboard()">Copy</button></div>
                         <div><button onclick="event.stopPropagation(); cutToClipboard()">Cut</button></div>
                         <div><button onclick="event.stopPropagation(); pasteFromClipboard()">Paste</button></div>
@@ -430,19 +432,23 @@
         };
         
         function copyToClipboard(){
-           
             socket.send(JSON.stringify({request:"copyToClipboard"}));
         }
         
         function cutToClipboard() {
-           
-        
             socket.send(JSON.stringify({request:"cutToClipboard"}));
         }
         
         function pasteFromClipboard(){
-            
             socket.send(JSON.stringify({request:"pasteFromClipboard"}));
+        }
+        
+        function undoCommand() {
+            socket.send(JSON.stringify({request:"undoCommand"}));
+        }
+        
+        function redoCommand() {
+            socket.send(JSON.stringify({request:"undoCommand"}));
         }
         
         document.addEventListener('click', function(event) {

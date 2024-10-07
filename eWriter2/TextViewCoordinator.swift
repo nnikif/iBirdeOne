@@ -143,7 +143,27 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
                     sharedState.pasteCommandIssued = false
                 }
             }
-            
+                if sharedState.undoCommandIssued {
+                if let undoManager = uiView.undoManager, undoManager.canUndo {
+                    undoManager.undo()
+                    
+                }
+                DispatchQueue.main.async {
+                    self.sharedState.undoCommandIssued = false
+                }
+            }
+
+            // Perform redo operation
+        if sharedState.redoCommandIssued {
+            if let undoManager = uiView.undoManager, undoManager.canRedo {
+                undoManager.redo()
+                
+             }
+            DispatchQueue.main.async {
+                self.sharedState.redoCommandIssued = false
+                
+            }
+        }
             
             
         }
@@ -173,15 +193,12 @@ class SharedTextState: ObservableObject {
     @Published var copyComandIssued: Bool = false
     @Published var pasteCommandIssued: Bool = false
     @Published var cutCommandIssued: Bool = false
+    @Published var redoCommandIssued: Bool = false
+    @Published var undoCommandIssued: Bool = false
     
     private init() {} // Singleton pattern
 }
 
-private var appClipboard: String? = nil
-
-func copyTextToAppClipboard(text: String) {
-    appClipboard = text
-}
 
 
 func pasteTextFromAppClipboard(into uiView: UITextView) {
