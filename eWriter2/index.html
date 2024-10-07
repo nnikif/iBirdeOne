@@ -307,6 +307,8 @@
         let prevSelectionInfosIndexes = [];
         let touchStartEvent;
         let clickTimeout;
+        const scrollTreshold = 10;
+        let startScrollTop;
         
         function calculateCursorPosition(event) {
             const clickX = event.clientX;
@@ -392,6 +394,7 @@
         
         document.addEventListener('touchstart', function(event) {
             touchStartEvent = event.changedTouches[0];
+            startScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         });
         
         document.addEventListener('dblclick', function(event) {
@@ -405,6 +408,14 @@
         document.addEventListener('touchend', function(event) {
                     // Check if there is a selection
                     if (touchStartEvent) {
+                        const currentScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                        
+                        const touchEndEvent = event.changedTouches[0];
+                        const deltaY = Math.abs(currentScrollTop - startScrollTop);
+                        if ( deltaY > scrollTreshold ) {
+                            touchStartEvent = null;
+                            return;
+                        }
                         const touchStartPosition = calculateCursorPosition(touchStartEvent);
                         const touchEndPosition = calculateCursorPosition(event.changedTouches[0]);
                         if (Math.abs(touchStartPosition - touchEndPosition) > 0) {
