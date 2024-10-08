@@ -275,8 +275,9 @@ func recalculateCursorPosition(text: String, position: Int) -> Int {
 
 func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> Int {
     let basePosition = recalculateCursorPosition(text: text, position: position)
-    guard basePosition >= 0 && basePosition < text.count else { return 0 }
-    
+//    print("basePosition: \(basePosition), start: \(start)")
+    guard basePosition >= 0  else { return 0 }
+    guard basePosition < text.count else { return text.count }
     let characters = Array(text)
     var newPosition = basePosition
     var currentChar: Character
@@ -295,6 +296,10 @@ func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> I
                     newPosition += 1
                 }
     } else {
+//        print("newPosition: \(newPosition), start: \(start), characters.count: \(characters.count)")
+        if newPosition >= characters.count {
+            newPosition = characters.count - 1
+        }
         while newPosition < characters.count {
             currentChar = characters[newPosition]
                         if currentChar.isLetter  || currentChar.isNumber || currentChar == "_" || currentChar == "-" {
@@ -304,7 +309,7 @@ func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> I
                         }
         }
     }
-    
+//    print("newPosition: \(newPosition), start: \(start)")
     return newPosition
 }
 

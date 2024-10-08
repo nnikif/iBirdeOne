@@ -28,7 +28,7 @@ final class WebSocketHandler: ChannelInboundHandler {
                 var data = frame.unmaskedData
                 if let byteArray = data.readBytes(length: data.readableBytes) {
                     if let message = String(bytes: byteArray, encoding: .utf8) {
-                                            print("Decoded message: \(message)")
+//                                            print("Decoded message: \(message)")
                         
                         // Try to parse the message as JSON
                         if let jsonData = message.data(using: .utf8),
@@ -58,11 +58,14 @@ final class WebSocketHandler: ChannelInboundHandler {
                                    if let selectionEnd = jsonObject["selectionEnd"] as? Int {
                                        DispatchQueue.main.async {
                                            SharedTextState.shared.startSelection = recalculateSelectionPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionStart, start: true)
+                                           print("selection started: \(SharedTextState.shared.startSelection)")
+                                           
                                            
                                        }
                                        DispatchQueue.main.async {
                                            SharedTextState.shared.selectionMoved = true
                                            SharedTextState.shared.endSelection = recalculateSelectionPosition(text: WebSocketBroadcaster.shared.documentText, position: selectionEnd, start: false)
+                                           print("selection ended: \(SharedTextState.shared.endSelection)")
                                            
                                        }
                                     }
