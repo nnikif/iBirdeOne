@@ -285,19 +285,19 @@ func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> I
         // Move to the start of the word
         while newPosition > 0 {
                     currentChar = characters[newPosition]
-            if !(currentChar.isLetter || currentChar.isNumber || currentChar == "_") {
+            if !(currentChar.isLetter || currentChar.isNumber || currentChar == "_" || currentChar == "-") {
                         break
                     }
                     newPosition -= 1
                 }
                 currentChar = characters[newPosition]
-                if !(currentChar.isLetter  || currentChar.isNumber || currentChar == "_") {
+        if !(currentChar.isLetter  || currentChar.isNumber || currentChar == "_" || currentChar == "-") {
                     newPosition += 1
                 }
     } else {
         while newPosition < characters.count {
             currentChar = characters[newPosition]
-                        if currentChar.isLetter  || currentChar.isNumber || currentChar == "_" {
+                        if currentChar.isLetter  || currentChar.isNumber || currentChar == "_" || currentChar == "-" {
                             newPosition += 1
                         } else {
                             break
@@ -314,6 +314,10 @@ enum MarkdownType {
 }
 
 func toggleMarkdownFormatting(for text: String, type: MarkdownType) -> String {
+    if text.contains("\n")  {
+        return text
+        
+    }
     let symbol: String
     switch type {
        case .italic:
