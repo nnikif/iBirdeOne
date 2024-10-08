@@ -275,8 +275,9 @@ func recalculateCursorPosition(text: String, position: Int) -> Int {
 
 func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> Int {
     let basePosition = recalculateCursorPosition(text: text, position: position)
-    guard basePosition >= 0 && basePosition < text.count else { return 0 }
-    
+//    print("basePosition: \(basePosition), start: \(start)")
+    guard basePosition >= 0  else { return 0 }
+    guard basePosition < text.count else { return text.count }
     let characters = Array(text)
     var newPosition = basePosition
     var currentChar: Character
@@ -285,26 +286,30 @@ func recalculateSelectionPosition(text: String, position: Int, start: Bool) -> I
         // Move to the start of the word
         while newPosition > 0 {
                     currentChar = characters[newPosition]
-            if !(currentChar.isLetter || currentChar.isNumber || currentChar == "_") {
+            if !(currentChar.isLetter || currentChar.isNumber || currentChar == "_" || currentChar == "-") {
                         break
                     }
                     newPosition -= 1
                 }
                 currentChar = characters[newPosition]
-                if !(currentChar.isLetter  || currentChar.isNumber || currentChar == "_") {
+        if !(currentChar.isLetter  || currentChar.isNumber || currentChar == "_" || currentChar == "-") {
                     newPosition += 1
                 }
     } else {
+//        print("newPosition: \(newPosition), start: \(start), characters.count: \(characters.count)")
+        if newPosition >= characters.count {
+            newPosition = characters.count - 1
+        }
         while newPosition < characters.count {
             currentChar = characters[newPosition]
-                        if currentChar.isLetter  || currentChar.isNumber || currentChar == "_" {
+                        if currentChar.isLetter  || currentChar.isNumber || currentChar == "_" || currentChar == "-" {
                             newPosition += 1
                         } else {
                             break
                         }
         }
     }
-    
+//    print("newPosition: \(newPosition), start: \(start)")
     return newPosition
 }
 
@@ -314,6 +319,10 @@ enum MarkdownType {
 }
 
 func toggleMarkdownFormatting(for text: String, type: MarkdownType) -> String {
+    if text.contains("\n")  {
+        return text
+        
+    }
     let symbol: String
     switch type {
        case .italic:

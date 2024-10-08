@@ -449,7 +449,7 @@
         }
         
         function redoCommand() {
-            socket.send(JSON.stringify({request:"undoCommand"}));
+            socket.send(JSON.stringify({request:"redoCommand"}));
         }
         
         function toggleItalics() {
