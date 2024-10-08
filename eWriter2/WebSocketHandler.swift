@@ -28,35 +28,24 @@ final class WebSocketHandler: ChannelInboundHandler {
                 var data = frame.unmaskedData
                 if let byteArray = data.readBytes(length: data.readableBytes) {
                     if let message = String(bytes: byteArray, encoding: .utf8) {
-//                                            print("Decoded message: \(message)")
+                                            print("Decoded message: \(message)")
                         
                         // Try to parse the message as JSON
                         if let jsonData = message.data(using: .utf8),
                            let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
                            let requestType = jsonObject["request"] as? String {
-                            
-                            // Only respond if the request is 'getContent'
-                            if requestType == "getContent" {
-                                
+                            switch requestType {
+                            case "getContent":
                                 let fileContent = WebSocketBroadcaster.shared.documentText
-                                
                                 let paragraphs = splitTextIntoParagraphs(text: fileContent)
-                                
                                 let messageObject = MessageObject(messageType:"paragraphReset", details: stringifyArrayofString(arrayData: paragraphs), cursorPositon: nil)
-                                                                  
                                 let jsonString = convertJSONToString(jsonObject: messageObject.toDictionary())
-                                                                  
                                 WebSocketBroadcaster.shared.broadcast(message: jsonString)
-                                
-                                
-                                
-                            }
-                            else if requestType == "cutToClipboard" {
+                            case "cutToClipboard":
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.cutCommandIssued = true
                                 }
-                            }
-                            else if requestType == "moveCursor" {
+                            case "moveCursor":
                                 if let newCursorPosition = jsonObject["cursorPosition"] as? Int {
                                     DispatchQueue.main.async {
                                         SharedTextState.shared.cursorMoved = true
@@ -64,8 +53,7 @@ final class WebSocketHandler: ChannelInboundHandler {
                                         
                                     }
                                 }
-                                                                
-                            } else if requestType == "selectionChange" {
+                            case "selectionChange":
                                 if let selectionStart = jsonObject["selectionStart"] as? Int {
                                    if let selectionEnd = jsonObject["selectionEnd"] as? Int {
                                        DispatchQueue.main.async {
@@ -79,36 +67,31 @@ final class WebSocketHandler: ChannelInboundHandler {
                                        }
                                     }
                                 }
-                            } else if requestType == "copyToClipboard" {
+                            case "copyToClipboard":
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.copyComandIssued = true
                                 }
-                            }
-                            else if requestType == "pasteFromClipboard" {
+                            case "pasteFromClipboard":
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.pasteCommandIssued = true
                                 }
-                            } else if requestType == "undoCommand" {
+                            case "undoCommand":
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.undoCommandIssued = true
                                 }
-                                
-                            } else if requestType == "redoCommand" {
+                            case "redoCommand":
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.redoCommandIssued = true
                                 }
-                            } else if requestType == "toggleBold" {
+                            case "toggleBold":
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.toggleBoldCommandIssued = true
                                 }
-
-                            } else if requestType == "toggleItalics" {
+                            case "toggleItalics":
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.toggleItalicCommandIssued = true
                                 }
-                            }
-                            
-                                else {
+                            default:
                                 print("Unknown request type: \(requestType)")
                             }
                         } else {
