@@ -262,64 +262,7 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
             }
         }
     }
-        
-//        print("Toggling italics in text view...")
-//        let selectedRange = textView.selectedRange
-//
-//        // Ensure there's selected text
-//        guard selectedRange.length > 0 else {
-//            // Optional: Handle zero-length selection if desired
-//            return
-//        }
-//
-//        // Get the selected text
-//        let nsText = textView.text as NSString
-//        let selectedText = nsText.substring(with: selectedRange)
-//
-//        // Toggle italics formatting
-//        let toggledText = toggleMarkdownFormatting(for: selectedText, type: type)
-//
-//        // Create a new text string with the toggled text
-//        let newText = nsText.replacingCharacters(in: selectedRange, with: toggledText)
-//
-//        // Update the UITextView's text
-//        textView.text = newText
-////        print("Italicized text: \(newText)")
-//
-//        // Adjust the selected range
-//        let newSelectedRange = NSRange(location: selectedRange.location, length: toggledText.count)
-//        textView.selectedRange = newSelectedRange
-//
-//        // Update the @Binding text
-//        DispatchQueue.main.async {
-//            self.text = newText
-//        }
-//        
-//        if let undoManager = textView.undoManager {
-//            undoManager.registerUndo(withTarget: textView) { target in
-//                // Restore the original text
-//                target.text = nsText as String
-//                target.selectedRange = selectedRange
-//
-//                // Update the @Binding text in the undo operation
-//                DispatchQueue.main.async {
-//                    self.text = nsText as String
-//                }
-//            }
-//        }
-//
-//        DispatchQueue.main.async {
-//            SharedTextState.shared.cursorPosition = textView.selectedRange.location
-//            SharedTextState.shared.startSelection = textView.selectedRange.location
-//            SharedTextState.shared.endSelection = textView.selectedRange.location + textView.selectedRange.length
-//            switch type {
-//                case .bold:
-//                    SharedTextState.shared.toggleBoldCommandIssued = false
-//                case .italic:
-//                    SharedTextState.shared.toggleItalicCommandIssued = false
-//            }
-//        }
-//    }
+
 }
 
 class SharedTextState: ObservableObject {
