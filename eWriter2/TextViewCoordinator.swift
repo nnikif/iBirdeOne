@@ -75,6 +75,7 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
 
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
+        textView.becomeFirstResponder()
         textView.delegate = context.coordinator
         textView.isEditable = true
         textView.isScrollEnabled = true
