@@ -50,7 +50,13 @@ final class WebSocketHandler: ChannelInboundHandler {
                                 
                                 
                                 
-                            } else if requestType == "moveCursor" {
+                            }
+                            else if requestType == "cutToClipboard" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.cutCommandIssued = true
+                                }
+                            }
+                            else if requestType == "moveCursor" {
                                 if let newCursorPosition = jsonObject["cursorPosition"] as? Int {
                                     DispatchQueue.main.async {
                                         SharedTextState.shared.cursorMoved = true
@@ -73,7 +79,35 @@ final class WebSocketHandler: ChannelInboundHandler {
                                        }
                                     }
                                 }
+                            } else if requestType == "copyToClipboard" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.copyComandIssued = true
+                                }
                             }
+                            else if requestType == "pasteFromClipboard" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.pasteCommandIssued = true
+                                }
+                            } else if requestType == "undoCommand" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.undoCommandIssued = true
+                                }
+                                
+                            } else if requestType == "redoCommand" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.redoCommandIssued = true
+                                }
+                            } else if requestType == "toggleBold" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.toggleBoldCommandIssued = true
+                                }
+
+                            } else if requestType == "toggleItalics" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.toggleItalicCommandIssued = true
+                                }
+                            }
+                            
                                 else {
                                 print("Unknown request type: \(requestType)")
                             }

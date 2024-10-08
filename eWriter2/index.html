@@ -7,45 +7,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Example</title>
+    <title>eWriter2</title>
     <style>
-           /* Embed your CSS here */
-           #content {
-               white-space: pre-wrap; /* Preserve newlines and spaces */
-               position: relative;
-               font-size: %{fontSize}px;
-               font-family: ${fontType:fontName};
-               width: 98vw;
-               word-break: break-word;
-               overflow-x: hidden;
-           }
-            .cursor {
-                       position: absolute;
-                       width: 1px;
-                       background-color: black;
-                       pointer-events: none;
-                      %{animateCursor}
+        * {
+                       box-sizing: border-box; /* Ensures padding and border are included in width calculation */
                    }
-        .paragraph {
-            min-height: %{fontSize}px; /* Ensure the empty div takes some space vertically */
-            white-space: pre-wrap; /* Respect whitespace, useful if the content has leading/trailing spaces */
-            
-        }
-        @keyframes blink {
-          50% {
-            opacity: 0;             /* Make the cursor disappear at halfway point */
-          }
-        }
+
+                   body, html {
+                       height: 100%;
+                       margin: 0;
+                       padding: 0;
+                       max-width: 100%;
+                       overflow-x: hidden; /* Hide horizontal overflow */
+                   }
+                    .wrapper {
+                        min-height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                   #content {
+                       white-space: pre-wrap; /* Preserve newlines and spaces */
+                       position: relative;
+                       font-size: %{fontSize}px;
+                       font-family: ${fontType:fontName};
+                       width: 98vw;
+                       word-break: break-word;
+                       overflow-x: hidden;
+                       flex: 1;
+                       padding: 20px;
+                   }
+                .footer {
+                    background-color: #333;
+                    color: white;
+                    text-align: center;
+                    padding: 10px 0;
+                    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+                    position: fixed;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: center;
+                }
+                .footer button {
+                    flex: 1;
+                    margin: 0 10px;
+                    padding: 15px;
+                    font-size: 16px;
+                    background-color: #555;
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+                }
+                    .cursor {
+                               position: absolute;
+                               width: 1px;
+                               background-color: black;
+                               pointer-events: none;
+                              %{animateCursor}
+                           }
+                .paragraph {
+                    min-height: %{fontSize}px; /* Ensure the empty div takes some space vertically */
+                    white-space: pre-wrap; /* Respect whitespace, useful if the content has leading/trailing spaces */
+                    
+                }
+                @keyframes blink {
+                  50% {
+                    opacity: 0;             /* Make the cursor disappear at halfway point */
+                  }
+                  }
+                  
+                  }
+        
     </style>
 </head>
 <body>
     <div id="outerContainer">
-        <div id="content" style="white-space: pre-wrap;">
-            Waiting for content...
+            <div class="wrapper">
+            <div id="content" style="white-space: pre-wrap;">
+                Waiting for content...
+            </div>
+            <div id="extra-space" style="height: 800px;"></div>
+            <footer class="footer">
+                        <div><button onclick="event.stopPropagation(); undoCommand()">Undo</button></div>
+                        <div><button onclick="event.stopPropagation(); redoCommand()">Redo</button></div>
+                        <div><button onclick="event.stopPropagation(); copyToClipboard()">Copy</button></div>
+                        <div><button onclick="event.stopPropagation(); cutToClipboard()">Cut</button></div>
+                        <div><button onclick="event.stopPropagation(); pasteFromClipboard()">Paste</button></div>
+                        <div><button onclick="event.stopPropagation(); toggleItalics()">Italics</button></div>
+                        <div><button onclick="event.stopPropagation(); toggleBold()">Bold</button></div>                        
+                    </footer>
+            </div>
+            
         </div>
-        <div id="extra-space" style="height: 800px;"></div>
-        
-    </div>
     
     
     <script>
@@ -297,6 +353,10 @@
         let maxHighlighted = 0;
         let prevSelectionInfosIndexes = [];
         let touchStartEvent;
+        let clickTimeout;
+        const scrollTreshold = 10;
+        let startScrollTop;
+        let nextMoveIgnored = false;
         
         function calculateCursorPosition(event) {
             const clickX = event.clientX;
@@ -372,18 +432,66 @@
             socket.send(JSON.stringify({ request: 'getContent' }));
         };
         
+        function copyToClipboard(){
+            socket.send(JSON.stringify({request:"copyToClipboard"}));
+        }
+        
+        function cutToClipboard() {
+            socket.send(JSON.stringify({request:"cutToClipboard"}));
+        }
+        
+        function pasteFromClipboard(){
+            socket.send(JSON.stringify({request:"pasteFromClipboard"}));
+        }
+        
+        function undoCommand() {
+            socket.send(JSON.stringify({request:"undoCommand"}));
+        }
+        
+        function redoCommand() {
+            socket.send(JSON.stringify({request:"undoCommand"}));
+        }
+        
+        function toggleItalics() {
+            socket.send(JSON.stringify({request:"toggleItalics"}));
+        }
+        
+        function toggleBold() {
+            socket.send(JSON.stringify({request:"toggleBold"}));
+        }
+        
         document.addEventListener('click', function(event) {
-            socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
+            clickTimeout = setTimeout(() => {
+                    socket.send(JSON.stringify({request:"moveCursor", cursorPosition: calculateCursorPosition(event)}));
+                    // Perform single-click action here
+                }, 100);
+            
         });
         
         document.addEventListener('touchstart', function(event) {
             touchStartEvent = event.changedTouches[0];
+            startScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        });
+        
+        document.addEventListener('dblclick', function(event) {
+            clearTimeout(clickTimeout);
+            const cursorPosition = calculateCursorPosition(event);
+            socket.send(JSON.stringify({request:"selectionChange", selectionStart: calculateCursorPosition(event), selectionEnd: cursorPosition + 1}));
+            
         });
 
         
         document.addEventListener('touchend', function(event) {
                     // Check if there is a selection
                     if (touchStartEvent) {
+                        const currentScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                        
+                        const touchEndEvent = event.changedTouches[0];
+                        const deltaY = Math.abs(currentScrollTop - startScrollTop);
+                        if ( deltaY > scrollTreshold ) {
+                            touchStartEvent = null;
+                            return;
+                        }
                         const touchStartPosition = calculateCursorPosition(touchStartEvent);
                         const touchEndPosition = calculateCursorPosition(event.changedTouches[0]);
                         if (Math.abs(touchStartPosition - touchEndPosition) > 0) {
