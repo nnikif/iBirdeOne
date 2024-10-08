@@ -313,7 +313,7 @@
 				CODE_SIGN_ENTITLEMENTS = eWriter2/eWriter2.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"eWriter2/Preview Content\"";
 				DEVELOPMENT_TEAM = RC2G248RB7;
 				ENABLE_PREVIEWS = YES;
@@ -349,7 +349,7 @@
 				CODE_SIGN_ENTITLEMENTS = eWriter2/eWriter2.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"eWriter2/Preview Content\"";
 				DEVELOPMENT_TEAM = RC2G248RB7;
 				ENABLE_PREVIEWS = YES;
