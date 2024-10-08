@@ -97,6 +97,15 @@ final class WebSocketHandler: ChannelInboundHandler {
                                 DispatchQueue.main.async {
                                     SharedTextState.shared.redoCommandIssued = true
                                 }
+                            } else if requestType == "toggleBold" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.toggleBoldCommandIssued = true
+                                }
+
+                            } else if requestType == "toggleItalics" {
+                                DispatchQueue.main.async {
+                                    SharedTextState.shared.toggleItalicCommandIssued = true
+                                }
                             }
                             
                                 else {

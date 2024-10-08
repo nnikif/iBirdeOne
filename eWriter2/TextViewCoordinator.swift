@@ -21,6 +21,7 @@ class TextViewCoordinator: NSObject, UITextViewDelegate {
     // Track text changes and propagate back to SwiftUI
     func textViewDidChange(_ textView: UITextView) {
         DispatchQueue.main.async {
+//            print("fixing text view: '\(textView.text)")
             self.parent.text = textView.text // Sync text changes with SwiftUI
         }
     }
@@ -164,8 +165,13 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
                 
             }
         }
-            
-            
+        if sharedState.toggleItalicCommandIssued {
+            toggleMarkdownInTextView(uiView, type: .italic)
+        }
+        
+        if sharedState.toggleBoldCommandIssued {
+            toggleMarkdownInTextView(uiView, type: .bold)
+        }
         }
         
         
@@ -180,10 +186,145 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
         SharedTextState.shared.endSelection = end
         SharedTextState.shared.selectionMoved = true
     }
+    
+    func toggleMarkdownInTextView(_ textView: UITextView, type: MarkdownType ) {
+        
+        let selectedRange = textView.selectedRange
+        
+        // Ensure there's selected text
+        guard selectedRange.length > 0 else {
+            return
+        }
+        
+        // Get the full text
+        guard let text = textView.text else {
+            return
+        }
+        
+        
+        // Convert NSRange to Range<String.Index>
+        guard let textRange = Range(selectedRange, in: text) else {
+            // Handle invalid range
+            return
+        }
+        
+        // Get the selected text
+        let selectedText = String(text[textRange])
+        
+        // Toggle italics formatting
+        let toggledText = toggleMarkdownFormatting(for: selectedText, type: type)
+        
+        
+        // Create a new text string with the toggled text
+        let newText = text.replacingCharacters(in: textRange, with: toggledText)
+        
+        // Update the UITextView's text
+        textView.text = newText
+        
+        // Adjust the selected range
+        let newSelectedRange = NSRange(location: selectedRange.location, length: toggledText.count)
+        textView.selectedRange = newSelectedRange
+        
+        // Update the @Binding text
+        DispatchQueue.main.async {
+            self.text = newText
+        }
+        
+        // Prepare variables for closure capture
+        let previousText = text
+        let previousSelectedRangeLocation = selectedRange.location
+        let previousSelectedRangeLength = selectedRange.length
+        
+        // Register undo operation
+        if let undoManager = textView.undoManager {
+            undoManager.registerUndo(withTarget: textView) { target in
+                // Restore the original text
+                target.text = previousText
+                target.selectedRange = NSRange(location: previousSelectedRangeLocation, length: previousSelectedRangeLength)
+                
+                // Update the @Binding text in the undo operation
+                DispatchQueue.main.async {
+                    self.text = previousText
+                }
+            }
+        }
+        
+        // Update the shared state
+        DispatchQueue.main.async {
+            SharedTextState.shared.cursorPosition = newSelectedRange.location
+            SharedTextState.shared.startSelection = newSelectedRange.location
+            SharedTextState.shared.endSelection = newSelectedRange.location + newSelectedRange.length
+            switch type {
+                case .bold:
+                    SharedTextState.shared.toggleBoldCommandIssued = false
+                case .italic:
+                    SharedTextState.shared.toggleItalicCommandIssued = false
+            }
+        }
+    }
+        
+//        print("Toggling italics in text view...")
+//        let selectedRange = textView.selectedRange
+//
+//        // Ensure there's selected text
+//        guard selectedRange.length > 0 else {
+//            // Optional: Handle zero-length selection if desired
+//            return
+//        }
+//
+//        // Get the selected text
+//        let nsText = textView.text as NSString
+//        let selectedText = nsText.substring(with: selectedRange)
+//
+//        // Toggle italics formatting
+//        let toggledText = toggleMarkdownFormatting(for: selectedText, type: type)
+//
+//        // Create a new text string with the toggled text
+//        let newText = nsText.replacingCharacters(in: selectedRange, with: toggledText)
+//
+//        // Update the UITextView's text
+//        textView.text = newText
+////        print("Italicized text: \(newText)")
+//
+//        // Adjust the selected range
+//        let newSelectedRange = NSRange(location: selectedRange.location, length: toggledText.count)
+//        textView.selectedRange = newSelectedRange
+//
+//        // Update the @Binding text
+//        DispatchQueue.main.async {
+//            self.text = newText
+//        }
+//        
+//        if let undoManager = textView.undoManager {
+//            undoManager.registerUndo(withTarget: textView) { target in
+//                // Restore the original text
+//                target.text = nsText as String
+//                target.selectedRange = selectedRange
+//
+//                // Update the @Binding text in the undo operation
+//                DispatchQueue.main.async {
+//                    self.text = nsText as String
+//                }
+//            }
+//        }
+//
+//        DispatchQueue.main.async {
+//            SharedTextState.shared.cursorPosition = textView.selectedRange.location
+//            SharedTextState.shared.startSelection = textView.selectedRange.location
+//            SharedTextState.shared.endSelection = textView.selectedRange.location + textView.selectedRange.length
+//            switch type {
+//                case .bold:
+//                    SharedTextState.shared.toggleBoldCommandIssued = false
+//                case .italic:
+//                    SharedTextState.shared.toggleItalicCommandIssued = false
+//            }
+//        }
+//    }
 }
 
 class SharedTextState: ObservableObject {
     static let shared = SharedTextState()
+    @Published var text: String = ""
     
     @Published var cursorPosition: Int = 0 // The shared cursor position
     @Published var startSelection: Int = 0
@@ -195,6 +336,8 @@ class SharedTextState: ObservableObject {
     @Published var cutCommandIssued: Bool = false
     @Published var redoCommandIssued: Bool = false
     @Published var undoCommandIssued: Bool = false
+    @Published var toggleItalicCommandIssued: Bool = false
+    @Published var toggleBoldCommandIssued: Bool = false
     
     private init() {} // Singleton pattern
 }

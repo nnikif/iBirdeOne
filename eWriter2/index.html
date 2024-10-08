@@ -96,7 +96,8 @@
                         <div><button onclick="event.stopPropagation(); copyToClipboard()">Copy</button></div>
                         <div><button onclick="event.stopPropagation(); cutToClipboard()">Cut</button></div>
                         <div><button onclick="event.stopPropagation(); pasteFromClipboard()">Paste</button></div>
-                        
+                        <div><button onclick="event.stopPropagation(); toggleItalics()">Italics</button></div>
+                        <div><button onclick="event.stopPropagation(); toggleBold()">Bold</button></div>                        
                     </footer>
             </div>
             
@@ -449,6 +450,14 @@
         
         function redoCommand() {
             socket.send(JSON.stringify({request:"undoCommand"}));
+        }
+        
+        function toggleItalics() {
+            socket.send(JSON.stringify({request:"toggleItalics"}));
+        }
+        
+        function toggleBold() {
+            socket.send(JSON.stringify({request:"toggleBold"}));
         }
         
         document.addEventListener('click', function(event) {
