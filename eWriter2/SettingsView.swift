@@ -50,6 +50,18 @@ struct SettingsView: View {
                 Toggle(isOn: $config.animateCursor) {
                     Text("Animate Cursor")
                 }
+                Picker("AutoCorrection Settings", selection: $config.autoCorrection) {
+                                   ForEach(AutoCorrectionConfigType.allCases, id: \.self) { autoCorrectionConfig in
+                                       Text(autoCorrectionConfig.description).tag(autoCorrectionConfig)
+                                       
+                                   }
+                               }
+                               Picker("InlinePrediction Settings", selection: $config.inlinePrediction) {
+                                   ForEach(InlinePredictionConfigType.allCases, id: \.self) { inlinePredictionConfig in
+                                       Text(inlinePredictionConfig.description).tag(inlinePredictionConfig)
+                                       
+                                   }
+                               }
             }
             
             Button(action: {

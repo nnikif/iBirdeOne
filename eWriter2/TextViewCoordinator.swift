@@ -69,6 +69,7 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
     @State private var coordinatorInstance: TextViewCoordinator?
     
     var onSelectionChange: ((Int, Int?, Int?) -> Void)?
+    var config: AppConfiguration 
     
     @ObservedObject var sharedState = SharedTextState.shared
     let concurrentQueue = DispatchQueue(label: "com.example.concurrentQueue", attributes: .concurrent)
@@ -81,12 +82,21 @@ struct TextViewWithSelectionObserver: UIViewRepresentable {
         textView.isScrollEnabled = true
         textView.font = UIFont.systemFont(ofSize: 18)
         textView.text = text // Set initial text
+        textView.autocorrectionType = config.autoCorrection.uiTextAutocorrectionType
+        textView.inlinePredictionType = config.inlinePrediction.uiTextInlinePredictionType
+//        print("autoCorrection set to: \(textView.autocorrectionType.rawValue)")
+//        print("inlinePrediction set to: \(textView.inlinePredictionType.rawValue)")
+
         self.coordinatorInstance = context.coordinator
 
         return textView
     }
     
     func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.autocorrectionType = config.autoCorrection.uiTextAutocorrectionType
+        uiView.inlinePredictionType = config.inlinePrediction.uiTextInlinePredictionType
+//        print("autoCorrection set to: \(uiView.autocorrectionType.rawValue)")
+//        print("inlinePrediction set to: \(uiView.inlinePredictionType.rawValue)")
         if uiView.text != text {
             uiView.text = text // Update UITextView if text changes
         }

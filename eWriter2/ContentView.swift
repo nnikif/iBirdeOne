@@ -32,7 +32,8 @@ struct ContentView: View {
                 endSelection: $endSelection,
                 onSelectionChange: { cursorPosition, startSelection, endSelection in
                     sendCursorSelectionUpdate(cursorPosition: cursorPosition, startSelection: startSelection, endSelection: endSelection, document:  document)
-                }
+                },
+                config: config
                 
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
