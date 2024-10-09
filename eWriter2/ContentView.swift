@@ -63,7 +63,7 @@ struct ContentView: View {
                     Text("Open this address in a web browser: ")
                         .font(.headline)
                     
-                    Text("http://\(ipAddress):8787")
+                    Text("http://\(ipAddress)")
                         .font(.headline) // Adjust font size to match the headline
                 }
                 .padding(.horizontal)
