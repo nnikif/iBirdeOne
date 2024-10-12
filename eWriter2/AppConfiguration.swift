@@ -20,7 +20,7 @@ class AppConfiguration: ObservableObject {
     
     init() {
         // Load saved settings from UserDefaults if available
-        fontSize = UserDefaults.standard.integer(forKey: "fontSize")
+        fontSize = UserDefaults.standard.object(forKey: "fontSize") as? Int ?? 16
         if UserDefaults.standard.object(forKey: "applyMarkdown") != nil {
             applyMarkdown = UserDefaults.standard.bool(forKey: "applyMarkdown")
         }
