@@ -2,13 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleIconName</key>
-    <string>AppIcon</string>
-    <key>CFBundleDocumentTypes</key>
+	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-            <key>CFBundleTypeName</key>
-            <string>eWriter Text Document</string>
+			<key>CFBundleTypeName</key>
+			<string>eWriter Text Document</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSItemContentTypes</key>
@@ -19,6 +17,8 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER).plainTextDocument</string>
 		</dict>
 	</array>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -32,10 +32,10 @@
 			<string>com.nnikif.eWriter2.text</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
-                <key>public.filename-extension</key>
-                <array>
-                    <string>ewriter</string>
-                </array>
+				<key>public.filename-extension</key>
+				<array>
+					<string>ewriter</string>
+				</array>
 			</dict>
 		</dict>
 	</array>

@@ -32,18 +32,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		FFF4CC4F2CAEE88B00BBC9A1 /* eWriter2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = eWriter2.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FFF4CC622CAEE88C00BBC9A1 /* eWriter2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = eWriter2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		FFF4CC6C2CAEE88C00BBC9A1 /* eWriter2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = eWriter2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FFF4CC4F2CAEE88B00BBC9A1 /* iBirde.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iBirde.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FFF4CC622CAEE88C00BBC9A1 /* iBirdeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iBirdeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FFF4CC6C2CAEE88C00BBC9A1 /* iBirdeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iBirdeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		FFF4CC742CAEE88C00BBC9A1 /* Exceptions for "eWriter2" folder in "eWriter2" target */ = {
+		FFF4CC742CAEE88C00BBC9A1 /* Exceptions for "eWriter2" folder in "iBirde" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = FFF4CC4E2CAEE88B00BBC9A1 /* eWriter2 */;
+			target = FFF4CC4E2CAEE88B00BBC9A1 /* iBirde */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -51,7 +51,7 @@
 		FFF4CC512CAEE88B00BBC9A1 /* eWriter2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				FFF4CC742CAEE88C00BBC9A1 /* Exceptions for "eWriter2" folder in "eWriter2" target */,
+				FFF4CC742CAEE88C00BBC9A1 /* Exceptions for "eWriter2" folder in "iBirde" target */,
 			);
 			path = eWriter2;
 			sourceTree = "<group>";
@@ -111,9 +111,9 @@
 		FFF4CC502CAEE88B00BBC9A1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FFF4CC4F2CAEE88B00BBC9A1 /* eWriter2.app */,
-				FFF4CC622CAEE88C00BBC9A1 /* eWriter2Tests.xctest */,
-				FFF4CC6C2CAEE88C00BBC9A1 /* eWriter2UITests.xctest */,
+				FFF4CC4F2CAEE88B00BBC9A1 /* iBirde.app */,
+				FFF4CC622CAEE88C00BBC9A1 /* iBirdeTests.xctest */,
+				FFF4CC6C2CAEE88C00BBC9A1 /* iBirdeUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,9 +121,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FFF4CC4E2CAEE88B00BBC9A1 /* eWriter2 */ = {
+		FFF4CC4E2CAEE88B00BBC9A1 /* iBirde */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FFF4CC752CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "eWriter2" */;
+			buildConfigurationList = FFF4CC752CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "iBirde" */;
 			buildPhases = (
 				FFF4CC4B2CAEE88B00BBC9A1 /* Sources */,
 				FFF4CC4C2CAEE88B00BBC9A1 /* Frameworks */,
@@ -136,7 +136,7 @@
 			fileSystemSynchronizedGroups = (
 				FFF4CC512CAEE88B00BBC9A1 /* eWriter2 */,
 			);
-			name = eWriter2;
+			name = iBirde;
 			packageProductDependencies = (
 				FFF4CC812CAEE9B800BBC9A1 /* NIO */,
 				FFF4CC832CAEE9B800BBC9A1 /* NIOCore */,
@@ -145,12 +145,12 @@
 				FF313E782CAFE3B3003E7EDE /* SwiftDiff */,
 			);
 			productName = eWriter2;
-			productReference = FFF4CC4F2CAEE88B00BBC9A1 /* eWriter2.app */;
+			productReference = FFF4CC4F2CAEE88B00BBC9A1 /* iBirde.app */;
 			productType = "com.apple.product-type.application";
 		};
-		FFF4CC612CAEE88C00BBC9A1 /* eWriter2Tests */ = {
+		FFF4CC612CAEE88C00BBC9A1 /* iBirdeTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FFF4CC7A2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "eWriter2Tests" */;
+			buildConfigurationList = FFF4CC7A2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "iBirdeTests" */;
 			buildPhases = (
 				FFF4CC5E2CAEE88C00BBC9A1 /* Sources */,
 				FFF4CC5F2CAEE88C00BBC9A1 /* Frameworks */,
@@ -164,16 +164,16 @@
 			fileSystemSynchronizedGroups = (
 				FFF4CC652CAEE88C00BBC9A1 /* eWriter2Tests */,
 			);
-			name = eWriter2Tests;
+			name = iBirdeTests;
 			packageProductDependencies = (
 			);
 			productName = eWriter2Tests;
-			productReference = FFF4CC622CAEE88C00BBC9A1 /* eWriter2Tests.xctest */;
+			productReference = FFF4CC622CAEE88C00BBC9A1 /* iBirdeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		FFF4CC6B2CAEE88C00BBC9A1 /* eWriter2UITests */ = {
+		FFF4CC6B2CAEE88C00BBC9A1 /* iBirdeUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FFF4CC7D2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "eWriter2UITests" */;
+			buildConfigurationList = FFF4CC7D2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "iBirdeUITests" */;
 			buildPhases = (
 				FFF4CC682CAEE88C00BBC9A1 /* Sources */,
 				FFF4CC692CAEE88C00BBC9A1 /* Frameworks */,
@@ -187,11 +187,11 @@
 			fileSystemSynchronizedGroups = (
 				FFF4CC6F2CAEE88C00BBC9A1 /* eWriter2UITests */,
 			);
-			name = eWriter2UITests;
+			name = iBirdeUITests;
 			packageProductDependencies = (
 			);
 			productName = eWriter2UITests;
-			productReference = FFF4CC6C2CAEE88C00BBC9A1 /* eWriter2UITests.xctest */;
+			productReference = FFF4CC6C2CAEE88C00BBC9A1 /* iBirdeUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -217,7 +217,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FFF4CC4A2CAEE88B00BBC9A1 /* Build configuration list for PBXProject "eWriter2" */;
+			buildConfigurationList = FFF4CC4A2CAEE88B00BBC9A1 /* Build configuration list for PBXProject "iBirde" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -235,9 +235,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				FFF4CC4E2CAEE88B00BBC9A1 /* eWriter2 */,
-				FFF4CC612CAEE88C00BBC9A1 /* eWriter2Tests */,
-				FFF4CC6B2CAEE88C00BBC9A1 /* eWriter2UITests */,
+				FFF4CC4E2CAEE88B00BBC9A1 /* iBirde */,
+				FFF4CC612CAEE88C00BBC9A1 /* iBirdeTests */,
+				FFF4CC6B2CAEE88C00BBC9A1 /* iBirdeUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -293,12 +293,12 @@
 /* Begin PBXTargetDependency section */
 		FFF4CC642CAEE88C00BBC9A1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = FFF4CC4E2CAEE88B00BBC9A1 /* eWriter2 */;
+			target = FFF4CC4E2CAEE88B00BBC9A1 /* iBirde */;
 			targetProxy = FFF4CC632CAEE88C00BBC9A1 /* PBXContainerItemProxy */;
 		};
 		FFF4CC6E2CAEE88C00BBC9A1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = FFF4CC4E2CAEE88B00BBC9A1 /* eWriter2 */;
+			target = FFF4CC4E2CAEE88B00BBC9A1 /* iBirde */;
 			targetProxy = FFF4CC6D2CAEE88C00BBC9A1 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -313,13 +313,13 @@
 				CODE_SIGN_ENTITLEMENTS = eWriter2/eWriter2.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"eWriter2/Preview Content\"";
 				DEVELOPMENT_TEAM = RC2G248RB7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = eWriter2/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -330,8 +330,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nnikif.eWriter2;
+				MARKETING_VERSION = 1.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nnikif.iBirde;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -349,13 +349,13 @@
 				CODE_SIGN_ENTITLEMENTS = eWriter2/eWriter2.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"eWriter2/Preview Content\"";
 				DEVELOPMENT_TEAM = RC2G248RB7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = eWriter2/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -366,8 +366,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nnikif.eWriter2;
+				MARKETING_VERSION = 1.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nnikif.iBirde;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -510,7 +510,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/eWriter2.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/eWriter2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iBirde.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iBirde";
 			};
 			name = Debug;
 		};
@@ -529,7 +529,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/eWriter2.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/eWriter2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iBirde.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iBirde";
 			};
 			name = Release;
 		};
@@ -570,7 +570,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FFF4CC4A2CAEE88B00BBC9A1 /* Build configuration list for PBXProject "eWriter2" */ = {
+		FFF4CC4A2CAEE88B00BBC9A1 /* Build configuration list for PBXProject "iBirde" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FFF4CC782CAEE88C00BBC9A1 /* Debug */,
@@ -579,7 +579,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FFF4CC752CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "eWriter2" */ = {
+		FFF4CC752CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "iBirde" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FFF4CC762CAEE88C00BBC9A1 /* Debug */,
@@ -588,7 +588,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FFF4CC7A2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "eWriter2Tests" */ = {
+		FFF4CC7A2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "iBirdeTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FFF4CC7B2CAEE88C00BBC9A1 /* Debug */,
@@ -597,7 +597,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FFF4CC7D2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "eWriter2UITests" */ = {
+		FFF4CC7D2CAEE88C00BBC9A1 /* Build configuration list for PBXNativeTarget "iBirdeUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FFF4CC7E2CAEE88C00BBC9A1 /* Debug */,

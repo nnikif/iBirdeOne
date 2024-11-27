@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "eInkTyping (1).png",
+      "filename" : "iBirde final.png.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -24,18 +24,19 @@
           "value" : "tinted"
         }
       ],
+      "filename" : "iBirde final.png 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
     },
     {
-      "filename" : "eInkTyping (1) 1.png",
+      "filename" : "iBirde final (512 x 512 px) (256 x 256 px) - 1.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "eInkTyping (1)@2x.png",
+      "filename" : "iBirde final (512 x 512 px).png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
