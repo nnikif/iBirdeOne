@@ -32,7 +32,8 @@ struct ContentView: View {
                 endSelection: $endSelection,
                 onSelectionChange: { cursorPosition, startSelection, endSelection in
                     sendCursorSelectionUpdate(cursorPosition: cursorPosition, startSelection: startSelection, endSelection: endSelection, document:  document)
-                }
+                },
+                config: config
                 
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -62,7 +63,7 @@ struct ContentView: View {
                     Text("Open this address in a web browser: ")
                         .font(.headline)
                     
-                    Text("http://\(ipAddress):8787")
+                    Text("http://\(ipAddress)")
                         .font(.headline) // Adjust font size to match the headline
                 }
                 .padding(.horizontal)

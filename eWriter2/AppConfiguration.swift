@@ -14,11 +14,13 @@ class AppConfiguration: ObservableObject {
     @Published var applyMarkdown: Bool = true
     @Published var fontType: FontType = .cormorant
     @Published var animateCursor: Bool = false
+    @Published var autoCorrection: AutoCorrectionConfigType = .no
+    @Published var inlinePrediction: InlinePredictionConfigType = .no
 
     
     init() {
         // Load saved settings from UserDefaults if available
-        fontSize = UserDefaults.standard.integer(forKey: "fontSize")
+        fontSize = UserDefaults.standard.object(forKey: "fontSize") as? Int ?? 16
         if UserDefaults.standard.object(forKey: "applyMarkdown") != nil {
             applyMarkdown = UserDefaults.standard.bool(forKey: "applyMarkdown")
         }
@@ -29,6 +31,14 @@ class AppConfiguration: ObservableObject {
                    let font = FontType(rawValue: savedFontType) {
                     fontType = font
                 }
+        if let savedAutoCorrection = UserDefaults.standard.string(forKey: "autoCorrection"),
+                  let autoCorrectionType = AutoCorrectionConfigType(rawValue: savedAutoCorrection) {
+                   autoCorrection = autoCorrectionType
+               }
+        if let savedInlinePrediction = UserDefaults.standard.string(forKey: "inlinePrediction"),
+                  let inlinePredictionType = InlinePredictionConfigType(rawValue: savedInlinePrediction) {
+                    inlinePrediction = inlinePredictionType
+               }
 
     }
     
@@ -37,7 +47,8 @@ class AppConfiguration: ObservableObject {
         UserDefaults.standard.set(applyMarkdown, forKey: "applyMarkdown")
         UserDefaults.standard.set(fontType.rawValue, forKey: "fontType")
         UserDefaults.standard.set(animateCursor, forKey: "animateCursor")
-
+        UserDefaults.standard.set(autoCorrection.rawValue, forKey: "autoCorrection")
+        UserDefaults.standard.set(inlinePrediction.rawValue, forKey: "inlinePrediction")
     }
 }
 
@@ -56,6 +67,60 @@ enum FontType: String, CaseIterable {
             return "Courier Prime"
         case .special_elite:
             return "Special Elite"
+        }
+    }
+}
+
+enum AutoCorrectionConfigType: String, CaseIterable {
+    case `default` = "default"
+    case yes = "yes"
+    case no = "no"
+
+    var uiTextAutocorrectionType: UITextAutocorrectionType {
+        switch self {
+        case .default:
+            return .default
+        case .yes:
+            return .yes
+        case .no:
+            return .no
+        }
+    }
+    var description: String {
+        switch self {
+        case .default:
+            return "Default"
+        case .yes:
+            return "Yes"
+        case .no:
+            return "No"
+        }
+    }
+}
+
+enum InlinePredictionConfigType: String, CaseIterable {
+    case `default` = "default"
+    case yes = "yes"
+    case no = "no"
+
+    var uiTextInlinePredictionType: UITextInlinePredictionType {
+        switch self {
+        case .default:
+            return .default
+        case .yes:
+            return .yes
+        case .no:
+            return .no
+        }
+    }
+    var description: String {
+        switch self {
+        case .default:
+            return "Default"
+        case .yes:
+            return "Yes"
+        case .no:
+            return "No"
         }
     }
 }

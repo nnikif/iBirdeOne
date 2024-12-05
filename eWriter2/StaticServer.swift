@@ -88,7 +88,7 @@ func startHTTPServer(group: EventLoopGroup, htmlFilePath: String, config: AppCon
         .serverChannelOption(ChannelOptions.backlog, value: 256)
         .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
     
-    let serverChannel = try bootstrap.bind(host: "0.0.0.0", port: 8787).wait()
+    let serverChannel = try bootstrap.bind(host: "0.0.0.0", port: 80).wait()
     print("Server running on: \(serverChannel.localAddress!)")
     try serverChannel.closeFuture.wait()
 }
