@@ -58,5 +58,3 @@ There was once support for autocorrection / autocompletion, but I've turned it o
 If you have any propositions for gainful employment which would not distract me from writing fiction/screenplays/studying languages/learning about D&D 5th edtion too much, please contact me at nikolay.nikiforov@gmail.com. 
 
 You can check some of my non-coding works here: https://linktr.ee/AGentleKnight
-
-And here's the donation page (have to work this out, though): https://ko-fi.com/agentleknight
